@@ -24,6 +24,12 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
   and stripped of location data. New messages arrive instantly for signed-in visitors and within a few
   seconds for everyone else; an unread badge counts what you missed. Authors can delete their messages
   and hosts (set with the `CHAT_MODERATORS` secret, see `backend/README.md`) can remove any message.
+- **Privacy, terms and chat rules.** `site/legal.html` holds the privacy policy (Swiss FADP, GDPR
+  where it applies), terms of use and chat rules for this independent demo. Signing in needs a ticked
+  consent box (the acceptance is recorded), the chat repeats the key rules where people post, others'
+  messages can be reported (three reports hide a message), and all data is deleted automatically on
+  6 December 2026. The documents open in a window inside the app ("Privacy & terms" under the list,
+  in the account window, in the chat) and as their own page.
 - **Private by account.** Sign-in is a 6-digit email code. Marks and notes belong to the account and
   only its owner can read them (Langrove policies); signing out clears them from the device. Anyone
   can browse the map without an account.

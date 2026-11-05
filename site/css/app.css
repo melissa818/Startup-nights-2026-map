@@ -697,12 +697,18 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
 .msg-text a { color: #9cc0ff; }
 .msg-photo { display: block; width: 100%; padding: 0; border: 0; background: #151515; cursor: zoom-in; }
 .msg-photo img { display: block; width: 260px; max-width: 100%; height: auto; max-height: 340px; object-fit: cover; }
-.msg-del {
+.msg-act {
   flex: 0 0 auto; width: 30px; height: 30px; display: grid; place-items: center; padding: 0;
   border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer; opacity: 0;
 }
-.msg:hover .msg-del, .msg-del:focus-visible { opacity: 1; }
+.msg:hover .msg-act, .msg-act:focus-visible, .msg-report.done { opacity: 1; }
 .msg-del:hover { color: var(--danger); background: #2e2e2e; }
+.msg-report:hover { color: var(--accent); background: #2e2e2e; }
+.msg-report.done { color: var(--accent); cursor: default; background: none; }
+.msg-reports {
+  flex: 0 0 auto; padding: 2px 7px; border-radius: 99px; white-space: nowrap;
+  background: rgba(255, 107, 107, .16); color: #ff9a9a; font-size: 11px; font-weight: 700;
+}
 
 .chat-foot { flex: 0 0 auto; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: #1b1b1b; }
 .chat-signin { text-align: center; }
@@ -717,6 +723,7 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
 .chat-name .form-error:empty, .chat-error:empty { display: none; }
 .chat-fine { margin: 7px 2px 0; font-size: 11.5px; color: var(--muted); }
 .chat-fine .link-btn { display: inline; margin: 0; padding: 0; font-size: 11.5px; }
+.chat-fine a { color: var(--muted); text-underline-offset: 3px; }
 .chat-row { display: flex; align-items: flex-end; gap: 7px; }
 .chat-row textarea {
   flex: 1; min-width: 0; height: 40px; min-height: 40px; max-height: 132px; resize: none;
@@ -734,7 +741,8 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   border: 1px solid #3a3a3a; border-radius: 12px; background: #232323; font-size: 12.5px; color: var(--muted);
 }
 .chat-attach img { width: 46px; height: 46px; object-fit: cover; border-radius: 8px; background: #111; }
-.chat-attach span { flex: 1; min-width: 0; }
+.chat-attach-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.chat-attach-text small { font-size: 11px; color: #c9b56a; }
 .chat-attach-x { flex: 0 0 auto; width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 22px; cursor: pointer; }
 .chat-error { margin: 6px 4px 0; }
 
@@ -756,7 +764,7 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .chat-icon, .chat-send { width: 44px; height: 44px; }
   .chat-row textarea { height: 44px; min-height: 44px; padding: 11px 14px; border-radius: 22px; }
   .chat .close { width: 44px; height: 44px; }
-  .msg-del { width: 36px; height: 36px; opacity: .5; }
+  .msg-act { width: 36px; height: 36px; opacity: .5; }
   .chat-older { padding: 10px 0; }
 }
 
@@ -792,3 +800,59 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .msg-row, .msg-meta { max-width: 86%; }
   .msg-photo img { width: 280px; }
 }
+
+/* ---------- terms, privacy and reporting ---------- */
+.consent { margin-top: 14px; padding: 10px 12px; border: 1px solid #3a3a3a; border-radius: 10px; background: #171717; }
+.consent ul { margin: 0 0 8px; padding-left: 18px; font-size: 12.5px; color: #cfcfca; line-height: 1.45; }
+.consent li { margin: 3px 0; }
+.modal label.check, label.check {
+  display: flex; align-items: flex-start; gap: 9px; margin: 6px 0 0; font-size: 13px; color: var(--text); line-height: 1.4; cursor: pointer;
+}
+.check input { flex: 0 0 auto; width: 18px; height: 18px; min-height: 0; margin: 1px 0 0; accent-color: var(--accent); }
+.consent a, .legal-links a, .foot-legal { color: #9cc0ff; text-underline-offset: 3px; }
+.legal-links { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+.foot-note { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 1px; text-align: right; }
+.foot-legal { font-size: 11.5px; }
+
+.legal-modal { width: min(760px, calc(100vw - 24px)); height: min(86dvh, 900px); max-height: none; padding: 0; overflow: hidden; }
+.legal-modal[open] { display: flex; flex-direction: column; }
+.legal-head {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 18px; border-bottom: 1px solid var(--line);
+}
+.legal-head strong { flex: 1; font-size: 15px; }
+.legal-open { font-size: 12.5px; color: var(--muted); text-underline-offset: 3px; }
+.legal-modal .close { position: static; }
+.legal-body { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 20px 28px; font-size: 14.5px; line-height: 1.6; }
+.legal-doc h1 { font-size: 22px; line-height: 1.2; margin: 30px 0 4px; letter-spacing: -0.01em; }
+.legal-doc h2 { font-size: 16px; margin: 22px 0 6px; }
+.legal-doc p, .legal-doc li { color: #e2e2de; }
+.legal-doc ul { padding-left: 20px; margin: 6px 0 12px; }
+.legal-doc li { margin: 4px 0; }
+.legal-doc a { color: #9cc0ff; }
+.legal-doc .version { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.legal-doc .box { border: 1px solid #4a4220; background: #2a2614; border-radius: 12px; padding: 10px 14px; margin: 14px 0; }
+.legal-doc .box p { margin: 6px 0; }
+.legal-doc .toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; padding: 0; list-style: none; }
+.legal-doc .toc a { display: inline-block; padding: 6px 12px; border: 1px solid #3a3a3a; border-radius: 99px; color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600; }
+.legal-doc hr { border: 0; border-top: 1px solid var(--line); margin: 30px 0 0; }
+
+.report-reasons { margin: 12px 0 0; padding: 0; border: 0; }
+.report-reasons legend { font-size: 12.5px; color: var(--muted); margin-bottom: 4px; padding: 0; }
+.modal .report-reasons label { display: flex; align-items: center; gap: 9px; margin: 0; padding: 7px 0; font-size: 14px; color: var(--text); cursor: pointer; }
+.report-reasons input { width: 18px; height: 18px; min-height: 0; margin: 0; accent-color: var(--accent); }
+#reportDetail { min-height: 56px; }
+
+@media (pointer: coarse) {
+  .check input { width: 22px; height: 22px; }
+  .modal .report-reasons label { min-height: 44px; padding: 4px 0; }
+  .report-reasons input { width: 22px; height: 22px; }
+  .legal-head .close { width: 44px; height: 44px; }
+}
+@media (max-width: 560px) {
+  .legal-modal { width: 100vw; height: 100dvh; max-width: none; margin: 0; border-radius: 0; border: 0; }
+  .legal-head { padding-top: max(8px, env(safe-area-inset-top)); }
+  .legal-body { padding: 0 16px calc(24px + env(safe-area-inset-bottom)); }
+}
+
+/* Long dialogs on small phones: keep the buttons in reach while the content scrolls. */
+.modal .modal-actions { position: sticky; bottom: 0; z-index: 1; background: #1d1d1d; padding: 10px 0 2px; }

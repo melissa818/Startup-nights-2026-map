@@ -7,6 +7,7 @@ import { api } from './store.js';
 
 const CHANNEL = 'chat/public';
 const SEEN_KEY = 'sn26.chat.seen';
+const REPORTED_KEY = 'sn26.chat.reported';
 const POLL_OPEN = 4000;          // chat open, no live connection
 const POLL_OPEN_LIVE = 30000;    // chat open, live: a safety net only
 const POLL_CLOSED = 60000;       // chat closed: keeps the unread badge current
@@ -17,7 +18,7 @@ const GROUP_MS = 5 * 60000;
 const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } };
 
-export function initChat({ store, esc, requireSignIn }) {
+export function initChat({ store, esc, requireSignIn, ensureTerms, showToast }) {
   const $ = (id) => document.getElementById(id);
   const panel = $('chat');
   const scroller = $('chatScroll');
@@ -47,6 +48,8 @@ export function initChat({ store, esc, requireSignIn }) {
   let uid = undefined;
   let lastFocus = null;
   let renaming = false;       // the name form is open to change an existing name
+  let reportingId = null;
+  const reported = new Set((() => { try { return JSON.parse(lsGet(REPORTED_KEY) || '[]'); } catch { return []; } })());
 
   // ---------- data ----------
 
@@ -146,7 +149,10 @@ export function initChat({ store, esc, requireSignIn }) {
   function build(m) {
     const li = document.createElement('li');
     const mine = !!store.user && m.author === store.user.id;
-    const canRemove = mine || !!store.user?.chat_host;
+    const isHost = !!store.user?.chat_host;
+    const canRemove = mine || isHost;
+    const canReport = !mine && !isHost;
+    const done = reported.has(m.id);
     li.className = `msg${mine ? ' mine' : ''}${m.host ? ' is-host' : ''}`;
     li.dataset.id = m.id;
     const w = m.image?.w || 4, h = m.image?.h || 3;
@@ -154,11 +160,15 @@ export function initChat({ store, esc, requireSignIn }) {
       ? `<button type="button" class="msg-photo" data-photo aria-label="Open the photo from ${esc(m.name)}"><img src="${esc(m.image.url)}" alt="Photo from ${esc(m.name)}" loading="lazy" decoding="async" width="${w}" height="${h}" style="aspect-ratio:${w}/${h}"></button>`
       : '';
     const del = canRemove
-      ? `<button type="button" class="msg-del" data-del aria-label="${mine ? 'Delete your message' : `Remove the message from ${esc(m.name)}`}" title="${mine ? 'Delete' : 'Remove'}"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M4.5 6h11M8 6V4.5h4V6M6 6l.7 9.5h6.6L14 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
+      ? `<button type="button" class="msg-act msg-del" data-del aria-label="${mine ? 'Delete your message' : `Remove the message from ${esc(m.name)}`}" title="${mine ? 'Delete' : 'Remove'}"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M4.5 6h11M8 6V4.5h4V6M6 6l.7 9.5h6.6L14 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
       : '';
+    const flag = canReport
+      ? `<button type="button" class="msg-act msg-report${done ? ' done' : ''}" data-report aria-label="${done ? 'You reported this message' : `Report the message from ${esc(m.name)}`}" title="${done ? 'Reported' : 'Report'}"${done ? ' disabled' : ''}><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M5.5 17V3.5M5.5 4h8.3l-1.6 3.2 1.6 3.3H5.5" fill="${done ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
+      : '';
+    const count = isHost ? '<span class="msg-reports" hidden></span>' : '';
     li.innerHTML = `
       <div class="msg-meta"><span class="msg-name">${mine ? 'You' : esc(m.name)}</span>${m.host ? '<span class="host-badge">Host</span>' : ''}<time datetime="${new Date(m.created_at).toISOString()}">${fmtTime(m.created_at)}</time></div>
-      <div class="msg-row"><div class="msg-bubble">${photo}${m.text ? `<p class="msg-text">${linkify(m.text)}</p>` : ''}</div>${del}</div>`;
+      <div class="msg-row"><div class="msg-bubble">${photo}${m.text ? `<p class="msg-text">${linkify(m.text)}</p>` : ''}</div>${count}${flag}${del}</div>`;
     const img = li.querySelector('img');
     if (img) {
       img.addEventListener('error', () => refreshPhoto(m.id));
@@ -176,6 +186,13 @@ export function initChat({ store, esc, requireSignIn }) {
       let li = nodes.get(m.id);
       if (!li) { li = build(m); nodes.set(m.id, li); }
       li.classList.toggle('cont', !!prev && prev.author === m.author && m.created_at - prev.created_at < GROUP_MS);
+      const badge = li.querySelector('.msg-reports');
+      if (badge) {
+        const n = Number(m.reports) || 0;
+        badge.hidden = !n;
+        badge.textContent = `${n} report${n === 1 ? '' : 's'}`;
+        badge.title = n ? `Reported by ${n} ${n === 1 ? 'person' : 'people'}. Remove it if it breaks the chat rules.` : '';
+      }
       if (listEl.children[i] !== li) listEl.insertBefore(li, listEl.children[i] || null);
       prev = m;
     });
@@ -257,6 +274,8 @@ export function initChat({ store, esc, requireSignIn }) {
     if (!e) return;
     if (e.type === 'message' && e.message) put(e.message);
     else if (e.type === 'deleted') [...(e.ids || []), ...(e.id ? [e.id] : [])].forEach(remove);
+    else if (e.type === 'reported' && msgs.has(e.id)) msgs.get(e.id).reports = e.reports;
+    else if (e.type === 'reset') msgs.clear();
     render();
   }
 
@@ -341,7 +360,7 @@ export function initChat({ store, esc, requireSignIn }) {
     $('chatNameForm').hidden = !u || (named && !renaming);
     $('chatForm').hidden = !u || !named || renaming;
     $('chatAs').textContent = u?.display_name || '';
-    $('chatSub').textContent = u?.chat_host ? 'Host: you can remove any message' : 'Everyone at the event can read this';
+    $('chatSub').textContent = u?.chat_host ? 'Host: you can remove any message' : 'Public: anyone can read this';
   }
 
   // ---------- chat name ----------
@@ -356,6 +375,7 @@ export function initChat({ store, esc, requireSignIn }) {
 
   $('chatNameForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!ensureTerms()) return;
     const name = $('chatNameInput').value.replace(/\s+/g, ' ').trim();
     const err = $('chatNameError');
     if (name.length < 2) { err.textContent = 'Please use at least 2 characters.'; return; }
@@ -461,6 +481,7 @@ export function initChat({ store, esc, requireSignIn }) {
   async function send() {
     if (sending) return;
     if (!requireSignIn('chat')) return;
+    if (!ensureTerms()) return;
     if (!store.user.display_name) { startRename(); return; }
     const text = input.value.replace(/\s+$/g, '').replace(/^\s+/g, '');
     if (!text && !attach) { input.focus(); return; }
@@ -489,7 +510,8 @@ export function initChat({ store, esc, requireSignIn }) {
       setTimeout(() => { stickToBottom = false; }, 1500);
     } catch (ex) {
       if (attach) $('chatAttachInfo').textContent = 'Photo ready to send';
-      if (ex.status === 400 && /chat name/i.test(ex.message)) startRename();
+      if (ex.status === 403 && /terms/i.test(ex.message)) { store.user.terms_version = null; ensureTerms(); }
+      else if (ex.status === 400 && /chat name/i.test(ex.message)) startRename();
       else $('chatError').textContent = ex.status ? ex.message : 'Could not send. Check your connection and try again.';
     } finally {
       sending = false;
@@ -516,6 +538,15 @@ export function initChat({ store, esc, requireSignIn }) {
       $('photoModal').showModal();
       return;
     }
+    const flag = e.target.closest('[data-report]');
+    if (flag) {
+      if (!requireSignIn('report') || !ensureTerms()) return;
+      reportingId = flag.closest('li').dataset.id;
+      $('reportForm').reset();
+      $('reportError').textContent = '';
+      $('reportModal').showModal();
+      return;
+    }
     const del = e.target.closest('[data-del]');
     if (del) {
       const li = del.closest('li');
@@ -532,6 +563,34 @@ export function initChat({ store, esc, requireSignIn }) {
       }
     }
   });
+
+  $('reportForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = reportingId;
+    if (!id) return;
+    const reason = new FormData($('reportForm')).get('reason') || 'other';
+    const detail = $('reportDetail').value.trim();
+    $('reportSend').disabled = true;
+    $('reportError').textContent = '';
+    try {
+      const res = await api('POST', `/chat/messages/${id}/report`, { reason, ...(detail ? { detail } : {}) });
+      reported.add(id);
+      lsSet(REPORTED_KEY, JSON.stringify([...reported].slice(-200)));
+      $('reportModal').close();
+      if (res.removed) remove(id);
+      else if (msgs.has(id)) msgs.get(id).reports = res.reports;
+      nodes.get(id)?.remove();
+      nodes.delete(id);           // rebuilt with the flag filled in
+      render();
+      showToast?.(res.removed ? 'Thanks. The message was hidden after several reports.' : 'Thanks for reporting. The hosts can see it now.');
+    } catch (ex) {
+      $('reportError').textContent = ex.status === 404 ? 'This message was already removed.' : ex.status ? ex.message : 'Could not send the report. Check your connection and try again.';
+    } finally {
+      $('reportSend').disabled = false;
+    }
+  });
+  $('reportCancel').addEventListener('click', () => $('reportModal').close());
+  $('reportClose').addEventListener('click', () => $('reportModal').close());
 
   $('photoClose').addEventListener('click', () => $('photoModal').close());
   $('photoModal').addEventListener('click', (e) => { if (e.target.id !== 'photoClose') $('photoModal').close(); });

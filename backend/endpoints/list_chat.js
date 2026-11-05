@@ -54,6 +54,7 @@ async function handler(ctx) {
       created_at: Number(r.created_at) || 0,
       changed_at: Number(r.changed_at) || 0,
       deleted: gone,
+      reports: Number(r.reports) || 0,
     };
   };
   const messages = await Promise.all(rows.map(view));

@@ -16,12 +16,13 @@ async function handler(ctx) {
   const marks = await ctx.db.BoothMark.deleteWhere({ visitor: ctx.principal });
   const notes = await ctx.db.BoothNote.deleteWhere({ owner: ctx.principal });
   const generalNotes = await ctx.db.Note.deleteWhere({ owner: ctx.principal });
+  const chatReports = await ctx.db.ChatReport.deleteWhere({ reporter: ctx.principal });
   const chatMessages = await ctx.db.ChatMessage.deleteWhere({ author: ctx.principal });
   await ctx.db.Visitor.delete(ctx.principal);
 
   if (said.length) {
     await ctx.realtime.publish('chat/public', { chat: 1, type: 'deleted', ids: said.map((r) => r.id), changed_at: Date.now() });
   }
-  ctx.log('account deleted', { name: 'account.deleted', marks, notes, generalNotes, chatMessages });
-  return ctx.auth.logout(ctx.ok({ deleted: true, marks, notes, generalNotes, chatMessages }));
+  ctx.log('account deleted', { name: 'account.deleted', marks, notes, generalNotes, chatMessages, chatReports });
+  return ctx.auth.logout(ctx.ok({ deleted: true, marks, notes, generalNotes, chatMessages, chatReports }));
 }

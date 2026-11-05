@@ -7,6 +7,11 @@
 async function handler(ctx) {
   const me = await ctx.db.Visitor.get(ctx.principal);
   if (!me) ctx.notFound();
+  // Only people who accepted the current terms of use and chat rules may post.
+  const TERMS = '2026-11-05';
+  if (me.terms_version !== TERMS) {
+    return ctx.json(403, { error: 'Terms not accepted', detail: 'Please accept the terms of use and chat rules first.', terms: TERMS });
+  }
   const name = String(me.display_name || '').trim();
   if (!name) ctx.badRequest('Choose a chat name first.');
 

@@ -166,7 +166,7 @@
       <ul class="list" id="list" aria-label="Startups"></ul>
       <div class="side-foot">
         <button type="button" class="btn ghost small" id="exportBtn">Export my notes</button>
-        <span class="foot-note" id="footNote">Sign in to save marks and notes</span>
+        <span class="foot-note"><span id="footNote">Sign in to save marks and notes</span><a href="legal.html#privacy" data-legal="privacy" class="foot-legal">Privacy &amp; terms</a></span>
       </div>
     </aside>
 
@@ -175,7 +175,7 @@
         <span class="chat-dot" id="chatDot" aria-hidden="true"></span>
         <div class="chat-titles">
           <h2 id="chatTitle">Live chat</h2>
-          <p id="chatSub">Everyone at the event can read this</p>
+          <p id="chatSub">Public: anyone can read this</p>
         </div>
         <button type="button" class="close" id="chatClose" aria-label="Close the chat">×</button>
       </div>
@@ -198,13 +198,13 @@
             <input id="chatNameInput" type="text" maxlength="30" autocomplete="nickname" placeholder="e.g. Anna from Acme" required>
             <button type="submit" class="btn primary" id="chatNameSave">Join</button>
           </div>
-          <p class="chat-fine">Everyone can see this name. Your email stays private.</p>
+          <p class="chat-fine">Everyone can see this name; your email stays private. The chat is public: don't share personal or confidential information, and ask people before you post a photo of them. <a href="legal.html#chat-rules" data-legal="chat-rules">Chat rules</a></p>
           <p class="form-error" id="chatNameError" role="alert"></p>
         </form>
         <form class="chat-compose" id="chatForm" novalidate hidden>
           <div class="chat-attach" id="chatAttach" hidden>
             <img id="chatPreview" alt="Photo to send">
-            <span id="chatAttachInfo">Photo ready to send</span>
+            <span class="chat-attach-text"><span id="chatAttachInfo">Photo ready to send</span><small>Only photos you may share. Ask people in it first.</small></span>
             <button type="button" class="chat-attach-x" id="chatAttachRemove" aria-label="Remove the photo">×</button>
           </div>
           <div class="chat-row">
@@ -214,7 +214,7 @@
             <button type="submit" class="chat-send" id="chatSend" aria-label="Send"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M10 16V4.5M5 9l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
           <p class="form-error chat-error" id="chatError" role="alert"></p>
-          <p class="chat-fine">Posting as <strong id="chatAs"></strong> · <button type="button" class="link-btn" id="chatRename">Change name</button></p>
+          <p class="chat-fine">Posting publicly as <strong id="chatAs"></strong> · <button type="button" class="link-btn" id="chatRename">Change name</button> · <a href="legal.html#chat-rules" data-legal="chat-rules">Chat rules</a></p>
         </form>
       </div>
     </section>
@@ -228,6 +228,14 @@
       <div id="stepEmail">
         <label for="authEmail">Email</label>
         <input id="authEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+        <div class="consent">
+          <ul>
+            <li>An independent demo by Langrove for Startup Nights 2026, not an official Startup Nights app.</li>
+            <li>The live chat is <strong>public</strong>: don't share personal or confidential information, and only post photos you're allowed to share.</li>
+            <li>You're responsible for what you post. All data is deleted on 6 December 2026.</li>
+          </ul>
+          <label class="check"><input type="checkbox" id="authAgree"> <span>I accept the <a href="legal.html#terms" data-legal="terms">Terms of use</a> and <a href="legal.html#chat-rules" data-legal="chat-rules">Chat rules</a> and have read the <a href="legal.html#privacy" data-legal="privacy">Privacy policy</a>.</span></label>
+        </div>
       </div>
       <div id="stepCode" hidden>
         <label for="authCode">6-digit code sent to <span id="authEmailEcho"></span></label>
@@ -236,10 +244,11 @@
       <div id="stepSignedIn" hidden>
         <p>Signed in as <strong id="authWho"></strong>. Your marks and notes are private to this account.</p>
         <p class="muted" id="authOwnBooth"></p>
+        <p class="legal-links"><a href="legal.html#privacy" data-legal="privacy">Privacy policy</a> · <a href="legal.html#terms" data-legal="terms">Terms of use</a> · <a href="legal.html#chat-rules" data-legal="chat-rules">Chat rules</a></p>
         <button type="button" class="link-btn danger-link" id="authDeleteStart">Delete my account</button>
       </div>
       <div id="stepDelete" hidden>
-        <p>This permanently deletes your account, the booths you marked, your notes and any visitor notes for your booth. This cannot be undone.</p>
+        <p>This permanently deletes your account, the booths you marked, your notes, any visitor notes for your booth, and your chat messages and photos. This cannot be undone.</p>
       </div>
       <p class="form-error" id="authError" role="alert"></p>
       <div class="modal-actions">
@@ -280,6 +289,59 @@
         </button>
       </div>
     </div>
+  </dialog>
+
+  <dialog class="modal legal-modal" id="legalModal" aria-label="Privacy policy, terms of use and chat rules">
+    <div class="legal-head">
+      <strong>Privacy, terms &amp; chat rules</strong>
+      <a href="legal.html" target="_blank" rel="noopener" class="legal-open">Open as page</a>
+      <button type="button" class="close" id="legalClose" aria-label="Close">×</button>
+    </div>
+    <div class="legal-body legal-doc" id="legalBody"><p class="muted">Loading…</p></div>
+  </dialog>
+
+  <dialog class="modal" id="termsModal" aria-labelledby="termsTitle">
+    <form class="modal-body" id="termsForm" novalidate>
+      <h2 id="termsTitle">Before you continue</h2>
+      <p class="muted">This demo now has terms of use, chat rules and a privacy policy. Please accept them to keep using your account.</p>
+        <div class="consent">
+          <ul>
+            <li>An independent demo by Langrove for Startup Nights 2026, not an official Startup Nights app.</li>
+            <li>The live chat is <strong>public</strong>: don't share personal or confidential information, and only post photos you're allowed to share.</li>
+            <li>You're responsible for what you post. All data is deleted on 6 December 2026.</li>
+          </ul>
+          <label class="check"><input type="checkbox" id="termsAgree"> <span>I accept the <a href="legal.html#terms" data-legal="terms">Terms of use</a> and <a href="legal.html#chat-rules" data-legal="chat-rules">Chat rules</a> and have read the <a href="legal.html#privacy" data-legal="privacy">Privacy policy</a>.</span></label>
+        </div>
+      <p class="form-error" id="termsError" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="termsSignOut">Sign out</button>
+        <button type="submit" class="btn primary" id="termsAccept">Accept</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="reportModal" aria-labelledby="reportTitle">
+    <form class="modal-body" id="reportForm" novalidate>
+      <button type="button" class="close" id="reportClose" aria-label="Close">×</button>
+      <h2 id="reportTitle">Report this message</h2>
+      <p class="muted">Hosts can see reported messages. A message reported by three people is hidden automatically.</p>
+      <fieldset class="report-reasons">
+        <legend>What's wrong with it?</legend>
+        <label><input type="radio" name="reason" value="personal" checked> Personal or confidential information</label>
+        <label><input type="radio" name="reason" value="photo"> Photo of someone without their consent</label>
+        <label><input type="radio" name="reason" value="harassment"> Harassment, insults or hate</label>
+        <label><input type="radio" name="reason" value="illegal"> Illegal, sexual or violent content</label>
+        <label><input type="radio" name="reason" value="spam"> Spam or a scam</label>
+        <label><input type="radio" name="reason" value="other"> Something else</label>
+      </fieldset>
+      <label for="reportDetail">Anything the hosts should know? (optional)</label>
+      <textarea id="reportDetail" rows="2" maxlength="500"></textarea>
+      <p class="form-error" id="reportError" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="reportCancel">Cancel</button>
+        <button type="submit" class="btn primary" id="reportSend">Report</button>
+      </div>
+    </form>
   </dialog>
 
   <dialog class="photo-modal" id="photoModal" aria-label="Photo">

@@ -6,6 +6,8 @@
 // synced to the Langrove backend; newest edit wins. Signing out clears the device cache.
 
 const LEGACY_KEY = 'sn26.marks.v1'; // marks saved before sign-in existed
+// Version of the terms of use, chat rules and privacy policy (legal.html). The backend checks the same value.
+export const TERMS_VERSION = '2026-11-05';
 const SYNC_DELAY_MS = 1000;
 
 const readJSON = (key) => {
@@ -225,6 +227,16 @@ export class MarkStore extends EventTarget {
   }
 
   // ----- profile -----
+
+  get termsAccepted() { return !!this.user && this.user.terms_version === TERMS_VERSION; }
+
+  // Record that the signed-in visitor accepted the current terms (throws so the caller can show why).
+  async acceptTerms() {
+    if (!this.user) return;
+    const me = await api('PATCH', '/visitors/me', { accept_terms: TERMS_VERSION });
+    Object.assign(this.user, me);
+    this.emit('auth', { user: this.user });
+  }
 
   async updateProfile(patch) {
     if (!this.user) return;

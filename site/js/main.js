@@ -901,11 +901,12 @@ let authEmail = '';
 let authReason = null;
 
 const REASONS = {
-  intro: 'Sign in with your email to mark booths you visit and keep private notes. Only you can see them, on any device.',
+  intro: 'Sign in with your email to mark booths you visit, keep private notes and join the live chat. Your notes are private to you, on any device.',
   mark: 'Sign in to mark booths and keep notes. Your notes are private: only you can see them.',
   booth: 'Sign in to keep private notes about the people who visit your booth.',
   notes: 'Sign in to write notes. They are private: only you can see them, on any device.',
   chat: 'Sign in with your email to post in the live chat. Everyone can read it; your email is never shown.',
+  report: 'Sign in to report a chat message to the hosts.',
 };
 
 function authStep(step) {
@@ -986,6 +987,7 @@ $('authForm').addEventListener('submit', async (e) => {
     if (step === 'email') {
       authEmail = $('authEmail').value.trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) throw new Error('Please enter a valid email address.');
+      if (!$('authAgree').checked) throw new Error('Please accept the terms of use and chat rules to sign in.');
       await store.requestCode(authEmail);
       $('authEmailEcho').textContent = authEmail;
       $('authCode').value = '';
@@ -1002,7 +1004,10 @@ $('authForm').addEventListener('submit', async (e) => {
         throw err;
       }
       storageSet(BROWSE_KEY, '1');
+      // They ticked the box on the first step: record which terms they accepted.
+      if (!store.termsAccepted) await store.acceptTerms().catch(() => {});
       modal.close();
+      if (!store.termsAccepted) ensureTerms();
       if (!me.welcomed) {
         showWelcome();
         store.updateProfile({ welcomed: true });
@@ -1022,6 +1027,70 @@ $('authForm').addEventListener('submit', async (e) => {
     btn.disabled = false;
   }
 });
+
+// ---------- terms of use, chat rules and privacy policy ----------
+
+const termsModal = $('termsModal');
+// Signed-in visitors must have accepted the current terms; returns true when they have.
+function ensureTerms() {
+  if (!store.user || store.termsAccepted) return true;
+  $('termsAgree').checked = false;
+  $('termsError').textContent = '';
+  if (!termsModal.open) termsModal.showModal();
+  return false;
+}
+termsModal.addEventListener('cancel', (e) => e.preventDefault()); // accept, or sign out
+$('termsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!$('termsAgree').checked) { $('termsError').textContent = 'Please tick the box to accept, or sign out.'; return; }
+  $('termsAccept').disabled = true;
+  try {
+    await store.acceptTerms();
+    termsModal.close();
+  } catch (err) {
+    $('termsError').textContent = err.status ? err.message : 'Could not save. Check your connection and try again.';
+  } finally {
+    $('termsAccept').disabled = false;
+  }
+});
+$('termsSignOut').addEventListener('click', async () => {
+  termsModal.close();
+  await store.signOut();
+});
+
+// The documents live in legal.html (also a page of its own); in the app they open in a window.
+const legalModal = $('legalModal');
+let legalLoaded = false;
+function scrollLegalTo(section) {
+  const body = $('legalBody');
+  const target = section && body.querySelector(`#${CSS.escape(section)}`);
+  body.scrollTop = target ? target.offsetTop - 10 : 0;
+}
+async function openLegal(section = 'privacy') {
+  if (!legalLoaded) {
+    try {
+      const res = await fetch('legal.html', { cache: 'no-cache' });
+      if (!res.ok) throw new Error(String(res.status));
+      const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+      $('legalBody').innerHTML = doc.getElementById('legal').innerHTML;
+      legalLoaded = true;
+    } catch {
+      window.open(`legal.html#${section}`, '_blank', 'noopener');
+      return;
+    }
+  }
+  if (!legalModal.open) legalModal.showModal();
+  scrollLegalTo(section);
+  $('legalClose').focus({ preventScroll: true });
+}
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[data-legal]');
+  if (link) { e.preventDefault(); openLegal(link.dataset.legal); return; }
+  const inner = e.target.closest('#legalBody a[href^="#"]');
+  if (inner) { e.preventDefault(); scrollLegalTo(inner.getAttribute('href').slice(1)); }
+});
+$('legalClose').addEventListener('click', () => legalModal.close());
+legalModal.addEventListener('click', (e) => { if (e.target === legalModal) legalModal.close(); });
 
 store.addEventListener('auth', (e) => {
   renderAccount();
@@ -1120,6 +1189,8 @@ else if (fromHash) {
 
 await store.init();
 renderAccount();
-chat = initChat({ store, esc, requireSignIn });
+chat = initChat({ store, esc, requireSignIn, ensureTerms, showToast });
+// Accounts from before the terms existed accept them once (or sign out).
+ensureTerms();
 // First visit without an account: offer sign-in once, with the option to just browse.
 if (store.backend && !store.signedIn && storageGet(BROWSE_KEY) !== '1') openAuth('intro');

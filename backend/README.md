@@ -23,6 +23,7 @@ project member deploys from the Langrove console.
 | own_startup | string | startup id of the booth this person staffs, if any |
 | welcomed | boolean | set after the first-login welcome has been shown |
 | display_name | string | the name shown with their chat messages (2-30 characters); the email is never shown |
+| terms_version / terms_accepted_at | string / number | which version of the terms, chat rules and privacy policy they accepted, and when (epoch ms) |
 
 **BoothMark**: one row per visitor and startup.
 
@@ -73,11 +74,25 @@ Unique index on `(visitor, startup)`, used by `upsertMany`.
 | image | file | optional photo (resized to at most 1600 px and re-encoded as JPEG on the device) |
 | image_w / image_h | number | photo size in pixels, so readers reserve space before it loads |
 | host | boolean | posted by a chat host (shown with a "Host" badge) |
+| reports | number | how many people reported it (hosts see this) |
 | published | boolean | false while a photo is still uploading; only published messages are public |
 | deleted | boolean | tombstone after the author or a host removed it (text and photo are cleared) |
 | created_at / changed_at | number | epoch ms; readers poll by `changed_at` |
 
 Indexes on `(published, changed_at)`, `(published, created_at)` and `(author, created_at)`.
+
+**ChatReport**: one report of a chat message by one visitor.
+
+| field | type | notes |
+|---|---|---|
+| id | uuid | |
+| message_id | string | the reported ChatMessage (a plain id, so reports never block deleting a message) |
+| reporter | relation → Visitor | |
+| reason | string | personal, photo, harassment, illegal, spam or other |
+| detail | text | optional note for the hosts, up to 500 characters |
+| created_at | number | epoch ms |
+
+Unique index on `(message_id, reporter)`: one report per person and message.
 
 ## Sign-in
 
@@ -97,6 +112,8 @@ signing people in as `Visitor` by `email`. The app calls:
 | `note.read` / `create` / `update` / `delete` | allow when `resource.owner` is the signed-in Visitor |
 | `chatmessage.read` | allow when `resource.published` is true (anyone, signed in or not), or the caller is the author |
 | `chatmessage.create` / `update` / `delete` | allow when `resource.author` is the signed-in Visitor |
+| `chatreport.read` / `create` / `delete` | allow when `resource.reporter` is the signed-in Visitor |
+| every model's `delete` (`visitor`, `boothmark`, `boothnote`, `note`, `chatmessage`, `chatreport`) | also allow the flow `retention_cleanup` |
 | `visitor.read` / `visitor.update` / `visitor.delete` | allow when the resource is the signed-in Visitor |
 
 So a person can only ever read or write their own marks, booth notes and general notes; anonymous callers get
@@ -121,7 +138,11 @@ nothing except the published chat messages. A chat host removing someone else's 
 | POST | `/chat/messages` | Visitor | [send_chat.js](endpoints/send_chat.js) |
 | POST | `/chat/messages/:id/publish` | Visitor | [publish_chat_photo.js](endpoints/publish_chat_photo.js) |
 | DELETE | `/chat/messages/:id` | Visitor | [delete_chat.js](endpoints/delete_chat.js) |
+| POST | `/chat/messages/:id/report` | Visitor | [report_chat.js](endpoints/report_chat.js) |
 | DELETE | `/sessions/current` | Visitor | [end_session.js](endpoints/end_session.js) |
+
+Flow **Retention cleanup** (`retention_cleanup`, schedule `41 2 * * *`, no URL):
+[flows/retention_cleanup.js](flows/retention_cleanup.js).
 
 `PUT /marks` takes `{ marks: { "<startup-id>": { visited, interested, note, changed_at } } }`, keeps
 whichever edit is newer per startup, and answers the visitor's full list.
@@ -145,6 +166,19 @@ whichever edit is newer per startup, and answers the visitor's full list.
 - Dev, staging and production share the same live data, so messages posted on dev appear on
   production too.
 
+## Terms, privacy and data retention
+
+- The privacy policy, terms of use and chat rules are in `site/legal.html` (version `2026-11-05`). The
+  sign-in form has a required checkbox; after sign-in the app sends `PATCH /visitors/me
+  { accept_terms: "2026-11-05" }`, which records the version and time. Accounts without the current
+  version are asked to accept or sign out. `POST /chat/messages` refuses (403) until accepted.
+  When the documents change, bump the version in `site/js/store.js` (`TERMS_VERSION`), `update_me`
+  and `send_chat` together, and everyone is asked again.
+- Reports: three reports from different people remove a message automatically; hosts see the count.
+- **Retention**: the flow `retention_cleanup` runs daily and from 6 December 2026, 00:00 Swiss time,
+  deletes every row of every model (chat photos with their messages). Before that date it does
+  nothing. Like any schedule it only runs once the project is deployed to staging or production.
+
 ## Tested (test data world)
 
 - Register: valid email is normalised and stored; invalid email answers 400.
@@ -164,6 +198,14 @@ whichever edit is newer per startup, and answers the visitor's full list.
   can, and the photo is gone from storage afterwards; a host can remove anyone's message; removals
   show as tombstones to `?after=` readers; anonymous deletes answer 401; the 9th message within a
   minute answers 429; deleting an account deletes its chat messages (8 in the test).
+- Terms: posting without accepting answers 403; accepting an old version answers 400; accepting the
+  current one records version and time, after which posting works.
+- Reports: a second report by the same person does not count again; reporting your own message and an
+  unknown reason answer 400; hosts' count goes 1, 2, and the 3rd report from a different person removes
+  the message (tombstone for readers).
+- Retention flow: before the cutoff it returns `skipped`; a forced test run deleted every row of every
+  model in the test world (4 visitors, 4 messages, 3 reports, notes and marks). A session whose
+  account is gone gets 401 from `GET /visitors/me`, so the app signs out.
 - Profile: `PATCH /visitors/me` sets `own_startup` and `welcomed` on the caller's own row only.
 - Delete account: without `confirm=delete-my-account` it answers 400 and deletes nothing; anonymous
   answers 401; with it, the caller's Visitor row, marks, booth notes and general notes are deleted (2 + 2 rows in the
