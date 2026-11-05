@@ -25,6 +25,9 @@ const decal = (opts) => new THREE.MeshBasicMaterial({
 });
 
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+// Grows past full size and settles back (ease-out-back), for a star that was just added.
+const popIn = (t) => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+const STAR_SIZE = 6.5;
 
 function polyBBox(poly) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -542,7 +545,8 @@ export class FloorScene extends EventTarget {
     const wantStar = !!interested && !(dim && !sel);
     if (wantStar && !b.star) {
       b.star = new THREE.Sprite(this.starMat);
-      b.star.scale.set(5.5, 5.5, 1);
+      b.star.scale.set(0.01, 0.01, 1);
+      b.star.userData.born = performance.now(); // pops in, so a new star is noticed at once
       this.scene.add(b.star);
     } else if (!wantStar && b.star) {
       this.scene.remove(b.star);
@@ -789,7 +793,16 @@ export class FloorScene extends EventTarget {
           b.mesh.scale.y = b.height;
           b.label.position.y = b.height + 0.1;
         }
-        if (b.star) b.star.position.set(b.center.x + b.size * 0.32, b.height + 3.2, b.center.z - b.size * 0.32);
+        if (b.star) {
+          b.star.position.set(b.center.x + b.size * 0.32, b.height + 3.2, b.center.z - b.size * 0.32);
+          const born = b.star.userData.born;
+          if (born) {
+            const k = Math.min(1, (performance.now() - born) / 450);
+            b.star.scale.setScalar(STAR_SIZE * popIn(k));
+            if (k >= 1) b.star.userData.born = 0;
+            active = true;
+          }
+        }
       }
       this.pin.visible = this.selected.length > 0 && !this.topView;
       if (this.ring.visible) {

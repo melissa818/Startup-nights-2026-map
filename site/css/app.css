@@ -216,14 +216,17 @@ button { cursor: pointer; }
 .detail-links { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
 .detail-links a { color: var(--accent); font-weight: 600; text-decoration: none; }
 .detail-links a:hover { text-decoration: underline; }
-.detail-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.detail-actions { display: flex; gap: 8px; margin-bottom: 10px; }
+/* A small secondary chip: starring is a side feature, not the card's main action. */
 .toggle {
-  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  padding: 9px 10px; border-radius: 9px; font-weight: 700;
-  border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px 5px 10px; border-radius: 99px; font-size: 13px; font-weight: 600;
+  border: 1px solid #3a3a3a; background: transparent; color: var(--muted); cursor: pointer;
 }
-.toggle:hover { background: #333; }
-.toggle.star[aria-pressed="true"] { background: var(--star); border-color: var(--star); color: #fff; }
+.toggle:hover { color: var(--text); border-color: #555; }
+.toggle.star[aria-pressed="true"] { color: #b9d2ff; border-color: rgba(76, 141, 255, .45); background: rgba(76, 141, 255, .12); }
+.toggle.star[aria-pressed="true"] svg { color: var(--star); }
+.name-tag .tag-star { margin-right: 4px; }
 .notes-label { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 5px; }
 textarea, .modal input {
   width: 100%; resize: vertical; min-height: 64px;
@@ -482,7 +485,7 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .chip { min-height: 44px; padding: 6px 14px; font-size: 13.5px; }
   .mark-btn { width: 44px; height: 44px; }
   .detail .close, .modal .close { width: 44px; height: 44px; top: 4px; right: 4px; }
-  .toggle { min-height: 46px; }
+  .toggle { min-height: 40px; padding: 6px 14px 6px 12px; }
   .btn { min-height: 44px; }
   .btn.small { min-height: 44px; padding: 8px 12px; }
   .detail-links a { display: inline-block; padding: 12px 0; }

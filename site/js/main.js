@@ -682,7 +682,13 @@ scene.onFrame = () => {
   const s = place ? null : byId.get(ui.selected || ui.spotlight);
   const p = place ? scene.placeScreenPoint() : s ? scene.screenPoint(s.booths) : null;
   if (!p) { nameTag.hidden = true; return; }
-  nameTag.textContent = place ? place.name : s.name;
+  // A starred startup shows a star on its map tag, the moment it is starred.
+  const starred = !place && store.signedIn && store.get(s.id).interested;
+  const label = `${starred ? '★' : ''}|${place ? place.name : s.name}`;
+  if (nameTag.dataset.label !== label) {
+    nameTag.dataset.label = label;
+    nameTag.innerHTML = `${starred ? '<span class="tag-star" aria-hidden="true">★</span>' : ''}${esc(place ? place.name : s.name)}`;
+  }
   nameTag.style.left = `${p.x}px`;
   nameTag.style.top = `${p.y}px`;
   nameTag.hidden = false;
