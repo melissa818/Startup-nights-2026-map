@@ -54,6 +54,7 @@ button { cursor: pointer; }
 .brand-logo { width: 34px; height: 34px; flex: 0 0 auto; display: block; }
 .brand h1 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; }
 .brand p { margin: 0; color: var(--muted); font-size: 12px; }
+.sub-short { display: none; }
 
 .progress { margin-left: auto; min-width: 210px; }
 .progress-text { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
@@ -413,9 +414,11 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
     padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 7px max(12px, env(safe-area-inset-left));
   }
   .brand { gap: 9px; }
-  .brand-logo { width: 28px; height: 28px; }
-  .brand p { display: none; }
-  .brand h1 { font-size: 15px; }
+  .brand-logo { width: 32px; height: 32px; }
+  .brand p { font-size: 11.5px; line-height: 1.25; }
+  .sub-long { display: none; }
+  .sub-short { display: inline; }
+  .brand h1 { font-size: 15px; line-height: 1.25; }
   .progress { order: 3; flex: 1 0 100%; min-width: 0; margin: 0; display: flex; align-items: center; gap: 10px; }
   .progress-text { font-size: 12px; }
   .progress-bar { flex: 1; margin: 0; height: 4px; }
@@ -463,9 +466,11 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
 /* Phones in landscape: map left, list right, compact header. */
 @media (max-height: 560px) and (orientation: landscape) {
   .topbar { flex-wrap: nowrap; padding-top: 6px; padding-bottom: 6px; padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
-  .brand p { display: none; }
-  .brand h1 { font-size: 14px; }
-  .brand-logo { width: 24px; height: 24px; }
+  .brand p { font-size: 11px; line-height: 1.2; }
+  .sub-long { display: none; }
+  .sub-short { display: inline; }
+  .brand h1 { font-size: 14px; line-height: 1.2; }
+  .brand-logo { width: 28px; height: 28px; }
   .progress { order: 0; flex: 1 1 auto; margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
   .progress-bar { flex: 1; margin: 0; max-width: 160px; }
   .account { margin-left: 0; }
