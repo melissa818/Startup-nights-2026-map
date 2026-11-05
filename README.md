@@ -18,18 +18,18 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
 - **General notes.** The pencil next to the search box opens a notepad for anything not tied to a
   booth (people met, ideas, follow-ups): add, edit or delete notes. The Notes filter shows them
   together with the startups you wrote notes on, search covers them, and they are in the CSV export.
-- **Live chat.** A public chat for everyone at the event ("Live chat" in the header; the speech
-  bubble next to the search box on phones). Anyone can read it; signed-in visitors post under a chat
-  name they choose (their email is never shown) and can add photos, which are resized on the device
-  and stripped of location data. New messages arrive instantly for signed-in visitors and within a few
-  seconds for everyone else; an unread badge counts what you missed. Authors can delete their messages
-  and hosts (set with the `CHAT_MODERATORS` secret, see `backend/README.md`) can remove any message.
-- **Privacy, terms and chat rules.** `site/legal.html` holds the privacy policy (Swiss FADP, GDPR
-  where it applies), terms of use and chat rules for this independent demo. Signing in needs a ticked
-  consent box (the acceptance is recorded), the chat repeats the key rules where people post, others'
-  messages can be reported (three reports hide a message), and all data is deleted automatically on
-  6 December 2026. The documents open in a window inside the app ("Privacy & terms" under the list,
-  in the account window, in the chat) and as their own page.
+- **AI assistant.** "Ask AI" in the header (the sparkle next to the search box on phones) opens an
+  assistant anyone can use without signing in: "Where is booth 82?", "Where is Langrove?", "Which
+  startups work on robotics?", "Where are the toilets?". Answers name the part of the hall and nearby
+  landmarks, with "Show on map" buttons. It also takes feedback for the Langrove team, as does a
+  simple feedback form; hosts read it in the account window. It runs on a Langrove agent with Claude
+  (see `backend/README.md`); without the API key it answers from the map's own data.
+- **Privacy and terms.** `site/legal.html` holds the privacy policy (Swiss FADP, GDPR where it
+  applies), terms of use and notes on the AI assistant for this independent demo. Signing in needs a
+  ticked consent box (the acceptance is recorded), the assistant reminds people not to share personal
+  information, and all data is deleted automatically on 6 December 2026. The documents open in a
+  window inside the app ("Privacy & terms" under the list, in the account window, in the assistant)
+  and as their own page.
 - **Private by account.** Sign-in is a 6-digit email code. Marks and notes belong to the account and
   only its owner can read them (Langrove policies); signing out clears them from the device. Anyone
   can browse the map without an account.
@@ -52,7 +52,8 @@ site/                    static web app (no build step)
   js/main.js             list, detail card, filters, sign-in, export
   js/scene.js            three.js scene: hall, rooms, seats, booths, picking, camera
   js/store.js            marks and notes: localStorage + sync with the backend
-  js/chat.js             live chat: messages, photos, realtime and polling
+  js/assistant.js        AI assistant panel, local fallback answers, feedback form and inbox
+  data/assistant.json    directory for the assistant's search tool (tools/build_assistant_data.py)
   data/venue.json        geometry extracted from the PDF (217 booths, walls, rooms, seats, exits)
   data/startups.json     194 exhibitors with booths, description, website, category
   vendor/three/          three.js r170 (MIT)
@@ -60,6 +61,7 @@ backend/                 reference copy of the Langrove backend (models, policie
 data-src/                booth list, web research, manual overrides
 tools/extract_venue.py   PDF -> site/data/venue.json
 tools/build_startups.py  booth list + research -> site/data/startups.json
+tools/build_assistant_data.py  startups + floor plan -> site/data/assistant.json
 source/                  the official PDF
 ```
 

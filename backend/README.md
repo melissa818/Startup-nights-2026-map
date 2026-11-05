@@ -22,8 +22,7 @@ project member deploys from the Langrove console.
 | email | string | unique index; the login field of the `code` door |
 | own_startup | string | startup id of the booth this person staffs, if any |
 | welcomed | boolean | set after the first-login welcome has been shown |
-| display_name | string | the name shown with their chat messages (2-30 characters); the email is never shown |
-| terms_version / terms_accepted_at | string / number | which version of the terms, chat rules and privacy policy they accepted, and when (epoch ms) |
+| terms_version / terms_accepted_at | string / number | which version of the terms and privacy policy they accepted, and when (epoch ms) |
 
 **BoothMark**: one row per visitor and startup.
 
@@ -63,36 +62,33 @@ Unique index on `(visitor, startup)`, used by `upsertMany`.
 | created_at / changed_at | number | epoch ms; newest edit wins |
 | deleted | boolean | tombstone, so a delete reaches the author's other devices |
 
-**ChatMessage**: the public live chat.
+**Feedback**: feedback for the Langrove team, from the form or through the AI assistant.
 
 | field | type | notes |
 |---|---|---|
 | id | uuid | |
-| author | relation → Visitor | |
-| name | string | the author's chat name when they posted |
-| text | text | up to 1000 characters |
-| image | file | optional photo (resized to at most 1600 px and re-encoded as JPEG on the device) |
-| image_w / image_h | number | photo size in pixels, so readers reserve space before it loads |
-| host | boolean | posted by a chat host (shown with a "Host" badge) |
-| reports | number | how many people reported it (hosts see this) |
-| published | boolean | false while a photo is still uploading; only published messages are public |
-| deleted | boolean | tombstone after the author or a host removed it (text and photo are cleared) |
-| created_at / changed_at | number | epoch ms; readers poll by `changed_at` |
-
-Indexes on `(published, changed_at)`, `(published, created_at)` and `(author, created_at)`.
-
-**ChatReport**: one report of a chat message by one visitor.
-
-| field | type | notes |
-|---|---|---|
-| id | uuid | |
-| message_id | string | the reported ChatMessage (a plain id, so reports never block deleting a message) |
-| reporter | relation → Visitor | |
-| reason | string | personal, photo, harassment, illegal, spam or other |
-| detail | text | optional note for the hosts, up to 500 characters |
+| visitor | relation → Visitor | set only when the sender was signed in |
+| message | text | up to 2000 characters |
+| rating | number | optional, 1-5 |
+| contact | string | optional name or email, only if the sender wants a reply |
+| source | string | `form` or `assistant` |
 | created_at | number | epoch ms |
 
-Unique index on `(message_id, reporter)`: one report per person and message.
+**AssistantUse**: when a question was asked or feedback sent, for usage limits. No content.
+
+| field | type | notes |
+|---|---|---|
+| id | uuid | |
+| client | string | random id the browser keeps (localStorage `sn26.client`) |
+| visitor | relation → Visitor | set only when signed in |
+| kind | string | `question` or `feedback` |
+| created_at | number | epoch ms |
+
+Indexes on `(created_at)` and `(client, created_at)`.
+
+**ChatMessage**, **ChatReport**: from the public chat that the AI assistant replaced. No endpoint
+reads or writes them any more; their rows (and chat photos) are deleted with an account and by the
+retention cleanup on 6 December 2026, after which the two models can be removed.
 
 ## Sign-in
 
@@ -110,15 +106,14 @@ signing people in as `Visitor` by `email`. The app calls:
 | `boothmark.read` / `create` / `update` / `delete` | allow when `resource.visitor` is the signed-in Visitor |
 | `boothnote.read` / `create` / `update` / `delete` | allow when `resource.owner` is the signed-in Visitor |
 | `note.read` / `create` / `update` / `delete` | allow when `resource.owner` is the signed-in Visitor |
-| `chatmessage.read` | allow when `resource.published` is true (anyone, signed in or not), or the caller is the author |
-| `chatmessage.create` / `update` / `delete` | allow when `resource.author` is the signed-in Visitor |
-| `chatreport.read` / `create` / `delete` | allow when `resource.reporter` is the signed-in Visitor |
-| every model's `delete` (`visitor`, `boothmark`, `boothnote`, `note`, `chatmessage`, `chatreport`) | also allow the flow `retention_cleanup` |
+| `feedback.read` / `create`, `assistantuse.read` / `create` | no rules: nobody. The endpoints and the `save_feedback` block write with `policy: false`; `list_feedback` reads with it after checking the caller is a host |
+| `feedback.delete` / `assistantuse.delete` | allow when `resource.visitor` is the signed-in Visitor, or the flow `retention_cleanup` |
+| `chatmessage.*` / `chatreport.*` (retired chat) | author / reporter only, plus delete for `retention_cleanup` |
+| every model's `delete` (`visitor`, `boothmark`, `boothnote`, `note`) | also allow the flow `retention_cleanup` |
 | `visitor.read` / `visitor.update` / `visitor.delete` | allow when the resource is the signed-in Visitor |
 
-So a person can only ever read or write their own marks, booth notes and general notes; anonymous callers get
-nothing except the published chat messages. A chat host removing someone else's message is checked in
-`delete_chat` (the caller's email must be in the `CHAT_MODERATORS` secret) before an unfenced update.
+So a person can only ever read or write their own marks, booth notes and general notes. Feedback is
+write-only: only hosts (emails listed in the `HOST_EMAILS` secret) can read it.
 
 ## Endpoints
 
@@ -134,11 +129,9 @@ nothing except the published chat messages. A chat host removing someone else's 
 | PUT | `/booth-notes` | Visitor | [save_booth_notes.js](endpoints/save_booth_notes.js) |
 | GET | `/notes` | Visitor | [list_notes.js](endpoints/list_notes.js) |
 | PUT | `/notes` | Visitor | [save_notes.js](endpoints/save_notes.js) |
-| GET | `/chat/messages` | anyone | [list_chat.js](endpoints/list_chat.js) |
-| POST | `/chat/messages` | Visitor | [send_chat.js](endpoints/send_chat.js) |
-| POST | `/chat/messages/:id/publish` | Visitor | [publish_chat_photo.js](endpoints/publish_chat_photo.js) |
-| DELETE | `/chat/messages/:id` | Visitor | [delete_chat.js](endpoints/delete_chat.js) |
-| POST | `/chat/messages/:id/report` | Visitor | [report_chat.js](endpoints/report_chat.js) |
+| POST | `/assistant/messages` | anyone | [ask_assistant.js](endpoints/ask_assistant.js) |
+| POST | `/feedback` | anyone | [send_feedback.js](endpoints/send_feedback.js) |
+| GET | `/feedback` | Visitor (hosts only) | [list_feedback.js](endpoints/list_feedback.js) |
 | DELETE | `/sessions/current` | Visitor | [end_session.js](endpoints/end_session.js) |
 
 Flow **Retention cleanup** (`retention_cleanup`, schedule `41 2 * * *`, no URL):
@@ -147,36 +140,35 @@ Flow **Retention cleanup** (`retention_cleanup`, schedule `41 2 * * *`, no URL):
 `PUT /marks` takes `{ marks: { "<startup-id>": { visited, interested, note, changed_at } } }`, keeps
 whichever edit is newer per startup, and answers the visitor's full list.
 
-## Live chat
+## AI assistant
 
-- **Reading** is open to everyone. `GET /chat/messages` answers the newest 60 messages; `?before=` pages
-  back, `?after=` answers what was added or removed since a time (readers poll with it), `?ids=` answers
-  fresh photo links (they expire after 5 minutes).
-- **Live updates**: a signed-in reader's first `GET /chat/messages` grants their session the realtime
-  channel `chat/public`; the site listens with `/_devcore/client.js`. Sending, publishing a photo and
-  removing a message broadcast `{ chat: 1, type: 'message' | 'deleted', ... }` there. Anonymous readers
-  (realtime needs a session) and anyone whose connection drops poll every few seconds while the chat
-  is open, and every minute otherwise for the unread badge.
-- **Posting** needs a sign-in and a chat name. Photos: `POST /chat/messages` with `image` answers an
-  upload URL; the browser `PUT`s the JPEG there, then `POST /chat/messages/:id/publish` shows it.
-  At most 8 messages a minute per person.
-- **Hosts**: set the project secret **`CHAT_MODERATORS`** in the Langrove console to the hosts' email
-  addresses (comma separated). Hosts can remove any message and their messages carry a "Host" badge.
-  A changed value applies within a minute; the secret reaches staging and production with the next deploy.
-- Dev, staging and production share the same live data, so messages posted on dev appear on
-  production too.
+- **Agent** `booth_assistant` ([agents/booth_assistant.md](agents/booth_assistant.md)): Claude Haiku 5.5
+  through the access `anthropic` (an `api-key` access whose key is the project secret
+  `ANTHROPIC_API_KEY`, set by a person in the console). Tools: [search_map](blocks/search_map.js),
+  [save_feedback](blocks/save_feedback.js) and [answer](blocks/answer.js), which ends the turn with
+  `{ text, startups, places, feedback_saved }`.
+- **Directory**: `search_map` reads `site/data/assistant.json` from the app's own site. It is built
+  by `tools/build_assistant_data.py` from the booth list and floor plan: each startup and place with
+  its part of the hall and nearest landmarks. Rerun it when the booth list changes.
+- **Asking**: `POST /assistant/messages { message, history: { turns }, client }` runs the agent
+  (12.5 s budget). The browser keeps the conversation in `sessionStorage` and sends the last 8 turns.
+  Questions are not stored; `AssistantUse` records only when, for limits: 60 questions a minute in
+  total, 10 a minute and 200 a day per browser. Without the agent (no key yet) it answers 503 and the
+  app answers from the map's own data instead.
+- **Feedback**: the agent's `save_feedback` tool, or the form (`POST /feedback`, 5 per 10 minutes per
+  browser). Hosts read it in the app (account window → "Read the feedback people sent") once their
+  email is in the project secret **`HOST_EMAILS`** (comma separated).
+- Dev, staging and production share the same live data.
 
 ## Terms, privacy and data retention
 
-- The privacy policy, terms of use and chat rules are in `site/legal.html` (version `2026-11-05`). The
-  sign-in form has a required checkbox; after sign-in the app sends `PATCH /visitors/me
-  { accept_terms: "2026-11-05" }`, which records the version and time. Accounts without the current
-  version are asked to accept or sign out. `POST /chat/messages` refuses (403) until accepted.
-  When the documents change, bump the version in `site/js/store.js` (`TERMS_VERSION`), `update_me`
-  and `send_chat` together, and everyone is asked again.
-- Reports: three reports from different people remove a message automatically; hosts see the count.
+- The privacy policy, terms of use and AI assistant notes are in `site/legal.html` (version
+  `2026-11-05b`). The sign-in form has a required checkbox; after sign-in the app sends
+  `PATCH /visitors/me { accept_terms: "2026-11-05b" }`, which records the version and time. Accounts
+  without the current version are asked to accept or sign out. When the documents change, bump the
+  version in `site/js/store.js` (`TERMS_VERSION`) and `update_me` together, and everyone is asked again.
 - **Retention**: the flow `retention_cleanup` runs daily and from 6 December 2026, 00:00 Swiss time,
-  deletes every row of every model (chat photos with their messages). Before that date it does
+  deletes every row of every model (feedback, usage records, notes, accounts, old chat rows and photos). Before that date it does
   nothing. Like any schedule it only runs once the project is deployed to staging or production.
 
 ## Tested (test data world)
@@ -191,7 +183,13 @@ whichever edit is newer per startup, and answers the visitor's full list.
   answer 401.
 - General notes: a visitor sees only notes they wrote; edits and deletes (tombstones) sync; a stale
   edit does not overwrite; anonymous calls answer 401.
-- Chat: posting needs a chat name (400 without); names are cleaned and must be 2-30 characters; a
+- AI assistant (before the API key exists): `POST /assistant/messages` answers 503 and logs why ("no
+  agent"); `search_map` finds booth 82 (Langrove, lower right, near the Cocktail Bar and the Food
+  Area), both toilet areas, and eight robotics startups; `save_feedback` stores a row linked to the
+  signed-in visitor; `answer` drops invalid ids.
+- Feedback: the form stores a row (rating 5); an empty message answers 400; a non-host reading
+  `GET /feedback` gets 403.
+- Retired chat (tested before it was replaced): posting needed a chat name (400 without); names are cleaned and must be 2-30 characters; a
   photo message answers an upload URL, the uploaded bytes come back unchanged, and it stays hidden
   from anonymous readers until its author publishes it (another visitor gets 404); GIFs are refused;
   anonymous readers see published messages; another visitor cannot delete a message (403), the author

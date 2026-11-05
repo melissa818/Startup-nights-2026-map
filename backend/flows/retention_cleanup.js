@@ -14,6 +14,8 @@ async function orchestrate(event, ctx) {
   // Every table, children before the Visitor rows they point at. Deleting a chat message deletes its photo.
   const all = { id: { null: false } };
   const deleted = {};
+  deleted.feedback = await ctx.db.Feedback.deleteWhere(all);
+  deleted.assistantUses = await ctx.db.AssistantUse.deleteWhere(all);
   deleted.chatReports = await ctx.db.ChatReport.deleteWhere(all);
   deleted.chatMessages = await ctx.db.ChatMessage.deleteWhere(all);
   deleted.boothMarks = await ctx.db.BoothMark.deleteWhere(all);
@@ -23,6 +25,5 @@ async function orchestrate(event, ctx) {
 
   const total = Object.values(deleted).reduce((a, b) => a + (Number(b) || 0), 0);
   if (total > 0) ctx.log('retention cleanup', { name: 'retention.cleanup', ...deleted });
-  if (deleted.chatMessages > 0) await ctx.realtime.publish('chat/public', { chat: 1, type: 'reset' });
   return { done: true, deleted };
 }

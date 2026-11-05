@@ -1,6 +1,6 @@
 import { FloorScene } from './scene.js';
 import { MarkStore } from './store.js';
-import { initChat } from './chat.js';
+import { initAssistant } from './assistant.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -13,7 +13,7 @@ const BROWSE_KEY = 'sn26.browse';
 
 const storageGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 const storageSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } };
-let chat = null; // the live chat, started once the account is known
+let chat = null; // the AI assistant panel
 
 // ---------- data ----------
 
@@ -901,12 +901,10 @@ let authEmail = '';
 let authReason = null;
 
 const REASONS = {
-  intro: 'Sign in with your email to mark booths you visit, keep private notes and join the live chat. Your notes are private to you, on any device.',
+  intro: 'Sign in with your email to mark booths you visit and keep private notes. Only you can see them, on any device.',
   mark: 'Sign in to mark booths and keep notes. Your notes are private: only you can see them.',
   booth: 'Sign in to keep private notes about the people who visit your booth.',
   notes: 'Sign in to write notes. They are private: only you can see them, on any device.',
-  chat: 'Sign in with your email to post in the live chat. Everyone can read it; your email is never shown.',
-  report: 'Sign in to report a chat message to the hosts.',
 };
 
 function authStep(step) {
@@ -1189,7 +1187,11 @@ else if (fromHash) {
 
 await store.init();
 renderAccount();
-chat = initChat({ store, esc, requireSignIn, ensureTerms, showToast });
+chat = initAssistant({
+  store, esc, fold, startups, byId, placeById, boothLabel, showToast,
+  showStartup: (id) => select(id, { fly: true, scroll: true }),
+  showPlace: (id) => selectPlace(id),
+});
 // Accounts from before the terms existed accept them once (or sign out).
 ensureTerms();
 // First visit without an account: offer sign-in once, with the option to just browse.
