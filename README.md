@@ -18,6 +18,12 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
 - **General notes.** The pencil next to the search box opens a notepad for anything not tied to a
   booth (people met, ideas, follow-ups): add, edit or delete notes. The Notes filter shows them
   together with the startups you wrote notes on, search covers them, and they are in the CSV export.
+- **Live chat.** A public chat for everyone at the event ("Live chat" in the header; the speech
+  bubble next to the search box on phones). Anyone can read it; signed-in visitors post under a chat
+  name they choose (their email is never shown) and can add photos, which are resized on the device
+  and stripped of location data. New messages arrive instantly for signed-in visitors and within a few
+  seconds for everyone else; an unread badge counts what you missed. Authors can delete their messages
+  and hosts (set with the `CHAT_MODERATORS` secret, see `backend/README.md`) can remove any message.
 - **Private by account.** Sign-in is a 6-digit email code. Marks and notes belong to the account and
   only its owner can read them (Langrove policies); signing out clears them from the device. Anyone
   can browse the map without an account.
@@ -40,6 +46,7 @@ site/                    static web app (no build step)
   js/main.js             list, detail card, filters, sign-in, export
   js/scene.js            three.js scene: hall, rooms, seats, booths, picking, camera
   js/store.js            marks and notes: localStorage + sync with the backend
+  js/chat.js             live chat: messages, photos, realtime and polling
   data/venue.json        geometry extracted from the PDF (217 booths, walls, rooms, seats, exits)
   data/startups.json     194 exhibitors with booths, description, website, category
   vendor/three/          three.js r170 (MIT)

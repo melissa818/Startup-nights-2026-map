@@ -1,5 +1,6 @@
 import { FloorScene } from './scene.js';
 import { MarkStore } from './store.js';
+import { initChat } from './chat.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -12,6 +13,7 @@ const BROWSE_KEY = 'sn26.browse';
 
 const storageGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 const storageSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } };
+let chat = null; // the live chat, started once the account is known
 
 // ---------- data ----------
 
@@ -459,6 +461,7 @@ function selectPlace(id, { fly = true } = {}) {
   flushNote();
   const p = placeById.get(id);
   if (!p) return;
+  if (chat?.isOpen() && chat.docked()) chat.close();
   hideWelcome();
   ui.selected = null;
   ui.place = p.id;
@@ -474,6 +477,7 @@ function selectPlace(id, { fly = true } = {}) {
 function select(id, { fly = false, scroll = false } = {}) {
   flushNote();
   const s = id ? byId.get(id) : null;
+  if (s && chat?.isOpen() && chat.docked()) chat.close();
   ui.selected = s ? s.id : null;
   if (ui.place) { ui.place = null; scene.highlightPlace(null); }
   if (ui.spotlight && ui.spotlight !== ui.selected) hideWelcome();
@@ -901,6 +905,7 @@ const REASONS = {
   mark: 'Sign in to mark booths and keep notes. Your notes are private: only you can see them.',
   booth: 'Sign in to keep private notes about the people who visit your booth.',
   notes: 'Sign in to write notes. They are private: only you can see them, on any device.',
+  chat: 'Sign in with your email to post in the live chat. Everyone can read it; your email is never shown.',
 };
 
 function authStep(step) {
@@ -1115,5 +1120,6 @@ else if (fromHash) {
 
 await store.init();
 renderAccount();
+chat = initChat({ store, esc, requireSignIn });
 // First visit without an account: offer sign-in once, with the option to just browse.
 if (store.backend && !store.signedIn && storageGet(BROWSE_KEY) !== '1') openAuth('intro');

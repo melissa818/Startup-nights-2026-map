@@ -33,7 +33,7 @@ export function newId() {
   return [...b].map((x) => x.toString(16).padStart(2, '0')).join('').replace(/(.{8})(.{4})(.{4})(.{4})/, '$1-$2-$3-$4-');
 }
 
-async function api(method, path, body) {
+export async function api(method, path, body) {
   const res = await fetch(path, {
     method,
     credentials: 'same-origin',
