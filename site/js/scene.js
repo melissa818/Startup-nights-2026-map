@@ -215,18 +215,22 @@ export class FloorScene extends EventTarget {
   }
 
   buildGround() {
+    // The ground is a backdrop: drawn first and never written to the depth buffer, so it cannot
+    // cover the hall floor. (A floor pushed back with a polygon offset lost to the ground at tilted,
+    // zoomed-out views, which made the floor flicker grey while switching from Top to 3D.)
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(12000, 12000),
-      new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 1 }),
+      new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 1, depthWrite: false }),
     );
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.4;
+    ground.renderOrder = -10;
     ground.receiveShadow = true;
     this.scene.add(ground);
 
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(this.hallW, this.hallD),
-      new THREE.MeshStandardMaterial({ color: '#f3f2ee', roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
+      new THREE.MeshStandardMaterial({ color: '#f3f2ee', roughness: 0.95 }),
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = 0;
