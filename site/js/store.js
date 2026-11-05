@@ -1,7 +1,8 @@
 // Personal data for the signed-in visitor, kept private by the backend's policies:
 //   marks       visited / interested / note per startup
 //   boothNotes  an exhibitor's notes about people who visited their own booth
-// Both are cached per account on this device (so they work with a flaky connection) and
+//   notes       general notes, not tied to a startup
+// All are cached per account on this device (so they work with a flaky connection) and
 // synced to the Langrove backend; newest edit wins. Signing out clears the device cache.
 
 const LEGACY_KEY = 'sn26.marks.v1'; // marks saved before sign-in existed
@@ -131,6 +132,7 @@ export class MarkStore extends EventTarget {
     this.backend = location.protocol.startsWith('http');
     this.marks = new Collection(this, { name: 'marks', endpoint: '/marks', field: 'marks', keyOf: (m) => m.startup });
     this.boothNotes = new Collection(this, { name: 'booth-notes', endpoint: '/booth-notes', field: 'notes', keyOf: (n) => n.id });
+    this.notes = new Collection(this, { name: 'notes', endpoint: '/notes', field: 'notes', keyOf: (n) => n.id });
   }
 
   get signedIn() { return !!this.user; }
@@ -191,6 +193,37 @@ export class MarkStore extends EventTarget {
     this.emit('change', { collection: 'booth-notes', id });
   }
 
+  // ----- general notes (not tied to a startup) -----
+
+  generalNotes() {
+    return Object.entries(this.notes.items)
+      .filter(([, n]) => !n.deleted && (n.text || '').trim())
+      .map(([id, n]) => ({ id, ...n }))
+      .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+  }
+
+  addNote(text) {
+    if (!this.user || !text.trim()) return null;
+    const id = newId();
+    this.notes.put(id, { id, text, created_at: Date.now(), deleted: false });
+    this.emit('change', { collection: 'notes', id });
+    return id;
+  }
+
+  updateNote(id, text) {
+    const n = this.notes.items[id];
+    if (!n || !this.user) return;
+    this.notes.put(id, { ...n, text });
+    this.emit('change', { collection: 'notes', id });
+  }
+
+  deleteNote(id) {
+    const n = this.notes.items[id];
+    if (!n || !this.user) return;
+    this.notes.put(id, { ...n, deleted: true });
+    this.emit('change', { collection: 'notes', id });
+  }
+
   // ----- profile -----
 
   async updateProfile(patch) {
@@ -226,6 +259,7 @@ export class MarkStore extends EventTarget {
     this.user = me;
     this.marks.load();
     this.boothNotes.load();
+    this.notes.load();
     // Marks made on this device before signing in move into the account.
     const legacy = readJSON(LEGACY_KEY);
     if (legacy) {
@@ -241,7 +275,7 @@ export class MarkStore extends EventTarget {
     }
     this.emit('auth', { user: this.user });
     this.emit('change', { collection: null });
-    await Promise.all([this.marks.push(true), this.boothNotes.push(true)]);
+    await Promise.all([this.marks.push(true), this.boothNotes.push(true), this.notes.push(true)]);
   }
 
   handleSyncError(e, retry) {
@@ -249,6 +283,7 @@ export class MarkStore extends EventTarget {
       // Session ended elsewhere: forget this account's data on the device.
       this.marks.clear(true);
       this.boothNotes.clear(true);
+      this.notes.clear(true);
       this.user = null;
       this.emit('auth', { user: null, expired: true });
       this.emit('change', { collection: null });
@@ -277,6 +312,7 @@ export class MarkStore extends EventTarget {
     await api('DELETE', '/visitors/me?confirm=delete-my-account');
     this.marks.clear(true);
     this.boothNotes.clear(true);
+    this.notes.clear(true);
     this.user = null;
     this.emit('auth', { user: null });
     this.emit('change', { collection: null });
@@ -285,13 +321,14 @@ export class MarkStore extends EventTarget {
 
   async signOut() {
     try {
-      await Promise.all([this.marks.push(), this.boothNotes.push()]);
+      await Promise.all([this.marks.push(), this.boothNotes.push(), this.notes.push()]);
       await api('DELETE', '/sessions/current');
     } catch {
       /* the session may already be gone */
     }
     this.marks.clear(true);
     this.boothNotes.clear(true);
+    this.notes.clear(true);
     this.user = null;
     this.emit('auth', { user: null });
     this.emit('change', { collection: null });

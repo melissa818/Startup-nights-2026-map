@@ -127,17 +127,20 @@
     <aside class="sidebar" aria-label="Exhibitors and places">
       <button type="button" class="sheet-handle" id="sheetHandle" aria-label="Hide the list and show the map" aria-expanded="true"><span></span></button>
       <div class="side-head">
-        <label class="search">
-          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <input id="search" type="search" placeholder="Search startups, booths, workshops…" autocomplete="off" aria-label="Search exhibitors and places">
-        </label>
+        <div class="search-row">
+          <label class="search">
+            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input id="search" type="search" placeholder="Search startups, booths, workshops…" autocomplete="off" aria-label="Search exhibitors and places">
+          </label>
+          <button type="button" class="notes-btn" id="notesBtn" aria-label="My notes" title="My notes" aria-pressed="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M4 16l.8-3.4 8.6-8.6a1.6 1.6 0 0 1 2.3 0l.3.3a1.6 1.6 0 0 1 0 2.3l-8.6 8.6L4 16z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.8 5.6l2.6 2.6" stroke="currentColor" stroke-width="1.7"/></svg></button>
+        </div>
         <div class="filters" role="group" aria-label="Filter">
           <button type="button" class="chip active" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="notes" aria-pressed="false">Notes</button>
           <button type="button" class="chip" data-filter="places" aria-pressed="false">Places</button>
           <button type="button" class="chip" data-filter="star" aria-pressed="false">Starred</button>
           <button type="button" class="chip" data-filter="todo" aria-pressed="false">To visit</button>
           <button type="button" class="chip" data-filter="visited" aria-pressed="false">Visited</button>
-          <button type="button" class="chip" data-filter="notes" aria-pressed="false">Notes</button>
         </div>
         <div class="list-meta">
           <span id="resultCount"></span>
@@ -147,6 +150,14 @@
               <option value="booth">Booth no.</option>
             </select>
           </label>
+        </div>
+      </div>
+      <div class="notes-composer" id="notesComposer" hidden>
+        <label class="nc-label" for="gnInput"><span id="gnLabel">New note</span><span class="private">only you can see your notes</span></label>
+        <textarea id="gnInput" rows="3" maxlength="8000" placeholder="People you met, ideas, things to follow up…"></textarea>
+        <div class="nc-actions">
+          <button type="button" class="btn ghost small" id="gnCancel" hidden>Cancel</button>
+          <button type="button" class="btn primary small" id="gnSave">Add note</button>
         </div>
       </div>
       <ul class="list" id="list" aria-label="Startups"></ul>

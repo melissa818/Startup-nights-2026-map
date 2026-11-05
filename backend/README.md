@@ -50,6 +50,17 @@ Unique index on `(visitor, startup)`, used by `upsertMany`.
 | created_at / changed_at | number | epoch ms; newest edit wins |
 | deleted | boolean | tombstone, so a delete reaches the author's other devices |
 
+**Note**: a visitor's general notes, not tied to a startup (people met, ideas, follow-ups).
+
+| field | type | notes |
+|---|---|---|
+| id | uuid | |
+| owner | relation → Visitor | the author; only they can read it |
+| client_id | string | id made on the device; unique with owner |
+| text | text | up to 8000 characters |
+| created_at / changed_at | number | epoch ms; newest edit wins |
+| deleted | boolean | tombstone, so a delete reaches the author's other devices |
+
 ## Sign-in
 
 Access **`code`**, kind `one-time`: a 6-digit code mailed by the platform, valid 10 minutes,
@@ -65,9 +76,10 @@ signing people in as `Visitor` by `email`. The app calls:
 |---|---|
 | `boothmark.read` / `create` / `update` / `delete` | allow when `resource.visitor` is the signed-in Visitor |
 | `boothnote.read` / `create` / `update` / `delete` | allow when `resource.owner` is the signed-in Visitor |
+| `note.read` / `create` / `update` / `delete` | allow when `resource.owner` is the signed-in Visitor |
 | `visitor.read` / `visitor.update` / `visitor.delete` | allow when the resource is the signed-in Visitor |
 
-So a person can only ever read or write their own marks and booth notes; anonymous callers get nothing.
+So a person can only ever read or write their own marks, booth notes and general notes; anonymous callers get nothing.
 
 ## Endpoints
 
@@ -81,6 +93,8 @@ So a person can only ever read or write their own marks and booth notes; anonymo
 | PUT | `/marks` | Visitor | [save_marks.js](endpoints/save_marks.js) |
 | GET | `/booth-notes` | Visitor | [list_booth_notes.js](endpoints/list_booth_notes.js) |
 | PUT | `/booth-notes` | Visitor | [save_booth_notes.js](endpoints/save_booth_notes.js) |
+| GET | `/notes` | Visitor | [list_notes.js](endpoints/list_notes.js) |
+| PUT | `/notes` | Visitor | [save_notes.js](endpoints/save_notes.js) |
 | DELETE | `/sessions/current` | Visitor | [end_session.js](endpoints/end_session.js) |
 
 `PUT /marks` takes `{ marks: { "<startup-id>": { visited, interested, note, changed_at } } }`, keeps
@@ -96,8 +110,10 @@ whichever edit is newer per startup, and answers the visitor's full list.
 - Booth notes: a visitor sees only notes they wrote; a delete is kept as a tombstone; a stale edit
   does not overwrite; another visitor using the same note id gets their own row; anonymous calls
   answer 401.
+- General notes: a visitor sees only notes they wrote; edits and deletes (tombstones) sync; a stale
+  edit does not overwrite; anonymous calls answer 401.
 - Profile: `PATCH /visitors/me` sets `own_startup` and `welcomed` on the caller's own row only.
 - Delete account: without `confirm=delete-my-account` it answers 400 and deletes nothing; anonymous
-  answers 401; with it, the caller's Visitor row, marks and booth notes are deleted (2 + 2 rows in the
+  answers 401; with it, the caller's Visitor row, marks, booth notes and general notes are deleted (2 + 2 rows in the
   test) and another visitor's rows are untouched. Signing in again with the same email starts a new,
   empty account.

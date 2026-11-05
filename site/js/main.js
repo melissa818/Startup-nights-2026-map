@@ -207,8 +207,48 @@ function placeRow(p) {
   </li>`;
 }
 
+const noteTimeFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+
+// The Notes view: general notes first, then the startups you wrote a note on.
+function renderNotesView(items) {
+  const q = ui.query;
+  const notes = store.generalNotes().filter((n) => !q || fold(n.text).includes(q));
+  $('resultCount').textContent = `${notes.length} note${notes.length === 1 ? '' : 's'} · ${items.length} startup${items.length === 1 ? '' : 's'} with notes`;
+  const rows = [];
+  if (notes.length) {
+    rows.push('<li class="section">General notes</li>');
+    for (const n of notes) {
+      rows.push(`<li class="gnote" data-gnote="${esc(n.id)}" ${editingNote === n.id ? 'aria-current="true"' : ''}>
+        <p>${esc(n.text)}</p>
+        <div class="gn-meta"><time>${esc(noteTimeFmt.format(new Date(n.created_at || Date.now())))}</time>
+          <span class="gn-actions"><button type="button" data-gact="edit">Edit</button><button type="button" data-gact="delete">Delete</button></span></div>
+      </li>`);
+    }
+  }
+  if (items.length) {
+    rows.push('<li class="section">Notes on startups</li>');
+    for (const s of items) {
+      const m = store.get(s.id);
+      const preview = (m.note || '').trim().replace(/\s+/g, ' ');
+      rows.push(`<li class="item" data-id="${esc(s.id)}" ${ui.selected === s.id ? 'aria-current="true"' : ''}>
+        <button type="button" class="item-main" data-act="open" aria-label="${esc(s.name)}, booth ${esc(boothLabel(s.booths))}">
+          <span class="num">${esc(s.booths.length > 1 ? `${s.booths[0]}+` : s.booths[0])}</span>
+          <span class="txt"><span class="name">${esc(s.name)}</span><span class="sub">${esc(preview)}</span></span>
+        </button>
+      </li>`);
+    }
+  }
+  if (!rows.length) {
+    rows.push(`<li class="empty">${q ? 'No note matches your search.' : 'No notes yet. Write your first one above, or add a note on any startup.'}</li>`);
+  }
+  $('list').innerHTML = rows.join('');
+}
+
 function renderList() {
   const items = sorted(startups.filter(matches));
+  $('notesComposer').hidden = ui.filter !== 'notes';
+  $('notesBtn').setAttribute('aria-pressed', ui.filter === 'notes');
+  if (ui.filter === 'notes') { renderNotesView(items); return; }
   const placeHits = places.filter(placeMatches);
   if (ui.filter === 'places') {
     $('resultCount').textContent = `${placeHits.length} places`;
@@ -256,6 +296,16 @@ function renderList() {
 }
 
 $('list').addEventListener('click', (e) => {
+  const gact = e.target.closest('button[data-gact]');
+  if (gact) {
+    const id = gact.closest('li[data-gnote]').dataset.gnote;
+    if (gact.dataset.gact === 'edit') startEditNote(id);
+    else if (confirm('Delete this note?')) {
+      if (editingNote === id) resetComposer();
+      store.deleteNote(id);
+    }
+    return;
+  }
   const btn = e.target.closest('button[data-act]');
   if (btn?.dataset.act === 'place') { selectPlace(btn.closest('li').dataset.place); return; }
   const li = e.target.closest('li[data-id]');
@@ -705,6 +755,56 @@ $('search').addEventListener('keydown', (e) => {
 });
 $('search').addEventListener('focus', () => { if (sheetMode.matches && sheet.state !== 'full') setSheet('full'); });
 
+// ---------- general notes ----------
+
+let editingNote = null;
+
+function resetComposer() {
+  editingNote = null;
+  $('gnInput').value = '';
+  $('gnLabel').textContent = 'New note';
+  $('gnSave').textContent = 'Add note';
+  $('gnCancel').hidden = true;
+}
+
+function startEditNote(id) {
+  const n = store.notes.items[id];
+  if (!n) return;
+  editingNote = id;
+  $('gnInput').value = n.text || '';
+  $('gnLabel').textContent = 'Edit note';
+  $('gnSave').textContent = 'Save';
+  $('gnCancel').hidden = false;
+  renderList();
+  if (sheetMode.matches && sheet.state !== 'full') setSheet('full');
+  $('gnInput').focus();
+}
+
+function saveNote() {
+  if (!requireSignIn('notes')) return;
+  const text = $('gnInput').value.trim();
+  if (!text) { $('gnInput').focus(); return; }
+  if (editingNote) store.updateNote(editingNote, text);
+  else store.addNote(text);
+  resetComposer();
+  $('list').scrollTo({ top: 0 });
+}
+
+$('gnSave').addEventListener('click', saveNote);
+$('gnCancel').addEventListener('click', () => { resetComposer(); renderList(); });
+$('gnInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveNote(); }
+});
+
+// The pencil next to search: open My notes, ready to write.
+$('notesBtn').addEventListener('click', () => {
+  if (ui.filter === 'notes') { setFilter('all'); return; }
+  if (!requireSignIn('notes')) return;
+  setFilter('notes');
+  if (sheetMode.matches && sheet.state !== 'full') setSheet('full');
+  $('gnInput').focus();
+});
+
 function setFilter(value) {
   ui.filter = value;
   for (const c of document.querySelectorAll('.chip[data-filter]')) {
@@ -760,13 +860,16 @@ $('exportBtn').addEventListener('click', () => {
   const rows = startups
     .map((s) => ({ s, m: store.get(s.id) }))
     .filter(({ m }) => m.visited || m.interested || (m.note || '').trim());
-  if (!rows.length) {
+  const general = store.generalNotes();
+  if (!rows.length && !general.length) {
     $('exportBtn').textContent = 'Nothing marked yet';
     setTimeout(() => { $('exportBtn').textContent = 'Export my notes'; }, 1800);
     return;
   }
-  downloadCsv('startup-nights-2026-my-booths.csv', ['Startup', 'Booth', 'Visited', 'Interested', 'Note', 'Website', 'Category'],
-    rows.map(({ s, m }) => [s.name, boothLabel(s.booths), m.visited ? 'yes' : '', m.interested ? 'yes' : '', m.note || '', s.website || '', s.category || '']));
+  downloadCsv('startup-nights-2026-my-notes.csv', ['Startup', 'Booth', 'Visited', 'Interested', 'Note', 'Website', 'Category', 'Written'], [
+    ...general.map((n) => ['General note', '', '', '', n.text, '', '', new Date(n.created_at).toLocaleString()]),
+    ...rows.map(({ s, m }) => [s.name, boothLabel(s.booths), m.visited ? 'yes' : '', m.interested ? 'yes' : '', m.note || '', s.website || '', s.category || '', '']),
+  ]);
 });
 
 // ---------- sign-in ----------
@@ -779,6 +882,7 @@ const REASONS = {
   intro: 'Sign in with your email to mark booths you visit and keep private notes. Only you can see them, on any device.',
   mark: 'Sign in to mark booths and keep notes. Your notes are private: only you can see them.',
   booth: 'Sign in to keep private notes about the people who visit your booth.',
+  notes: 'Sign in to write notes. They are private: only you can see them, on any device.',
 };
 
 function authStep(step) {
@@ -898,6 +1002,8 @@ $('authForm').addEventListener('submit', async (e) => {
 
 store.addEventListener('auth', (e) => {
   renderAccount();
+  if (!store.user && !['all', 'places'].includes(ui.filter)) setFilter('all');
+  if (!store.user) resetComposer();
   renderList();
   if (ui.selected) renderDetail();
   if (e.detail?.expired) openAuth('mark');

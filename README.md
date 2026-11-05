@@ -15,6 +15,9 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
 - **Track your visit.** Signed-in visitors mark booths as *visited* (turns green) or *interested*
   (turns blue with a star) and keep notes per startup. Filter the list by Starred, To visit, Visited
   or Notes, and export everything as a CSV after the event.
+- **General notes.** The pencil next to the search box opens a notepad for anything not tied to a
+  booth (people met, ideas, follow-ups): add, edit or delete notes. The Notes filter shows them
+  together with the startups you wrote notes on, search covers them, and they are in the CSV export.
 - **Private by account.** Sign-in is a 6-digit email code. Marks and notes belong to the account and
   only its owner can read them (Langrove policies); signing out clears them from the device. Anyone
   can browse the map without an account.
@@ -36,7 +39,7 @@ site/                    static web app (no build step)
   css/app.css
   js/main.js             list, detail card, filters, sign-in, export
   js/scene.js            three.js scene: hall, rooms, seats, booths, picking, camera
-  js/store.js            marks: localStorage + sync with the backend
+  js/store.js            marks and notes: localStorage + sync with the backend
   data/venue.json        geometry extracted from the PDF (217 booths, walls, rooms, seats, exits)
   data/startups.json     194 exhibitors with booths, description, website, category
   vendor/three/          three.js r170 (MIT)
