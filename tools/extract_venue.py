@@ -43,7 +43,7 @@ ROOMS = [
     ((518, 456), "Café", "food"),
     ((170, 456), "SchüGa Bier Bar", "bar"),
     ((770, 458), "Cocktail Bar", "bar"),
-    ((347, 463), "Red Bull Bar", "bar"),
+    ((347, 463), "Red Bull Bar", "bar", {"x": 350.5, "y": 468.2, "w": 46, "h": 12, "rot": 56}),
     ((213, 482), "Snack Bar", "food"),
     ((83, 525), "Toilets", "service"),
     ((370, 562), "Smoking Area", "service"),
@@ -117,13 +117,14 @@ def main(pdf_path, out_path):
 
     room_shapes = dedupe([{"bbox": bbox(c), "poly": polygon(c), "fill": fill(c)}
                           for c in curves if fill(c) in (GREY, GOLD) and big(c)])
-    # Gaming area (a plain rectangle in the PDF) with the dart lanes at its top.
+    # Gaming area (a plain rectangle in the PDF) with the dart lanes at its top. The two do not
+    # overlap, so neither hides the other's label and no faces share a plane.
     rooms = [
-        {"name": "Gaming Area", "kind": "area", "poly": [[749.5, 290.4], [790.9, 290.4], [790.9, 426.0], [749.5, 426.0]]},
+        {"name": "Gaming Area", "kind": "area", "poly": [[749.5, 331.8], [790.9, 331.8], [790.9, 426.0], [749.5, 426.0]]},
         {"name": "Dart Area", "kind": "area", "poly": [[749.5, 290.4], [790.9, 290.4], [790.9, 331.8], [749.5, 331.8]], "inset": True},
     ]
     used = set()
-    for (cx, cy), name, kind in ROOMS:
+    for (cx, cy), name, kind, *extra in ROOMS:
         best = min(
             (s for s in room_shapes if id(s) not in used),
             key=lambda s: abs((s["bbox"][0] + s["bbox"][2]) / 2 - cx) + abs((s["bbox"][1] + s["bbox"][3]) / 2 - cy),
@@ -132,7 +133,10 @@ def main(pdf_path, out_path):
         by = (best["bbox"][1] + best["bbox"][3]) / 2
         assert abs(bx - cx) + abs(by - cy) < 4, (name, cx, cy, bx, by)
         used.add(id(best))
-        rooms.append({"name": name, "kind": kind, "poly": best["poly"]})
+        room = {"name": name, "kind": kind, "poly": best["poly"]}
+        if extra:
+            room["label"] = extra[0]  # label position, size and rotation (degrees) for slanted rooms
+        rooms.append(room)
 
     arrow = [polygon(c) for c in curves if fill(c) == GOLD and big(c)
              and c["x1"] < 145 and c["top"] > 230 and c["bottom"] < 470]

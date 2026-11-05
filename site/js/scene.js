@@ -17,6 +17,13 @@ const ROOM_H = { stage: 3, bar: 6, lounge: 7, food: 5, service: 7, area: 2, work
 const WALL_H = 10;
 const FONT = '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif';
 
+// Material for text and signs lying flat on a surface: drawn on top of that surface, never inside it.
+const decal = (opts) => new THREE.MeshBasicMaterial({
+  transparent: true, depthWrite: false,
+  polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4,
+  ...opts,
+});
+
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 function polyBBox(poly) {
@@ -85,8 +92,11 @@ export class FloorScene extends EventTarget {
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#2e2e2e');
+    // The ground fades into the background instead of ending in a hard edge.
+    this.scene.fog = new THREE.Fog('#2e2e2e', 1700, 4200);
 
-    this.camera = new THREE.PerspectiveCamera(42, 1, 1, 6000);
+    // A near plane of 4 (not 1) gives the depth buffer enough precision for flat labels.
+    this.camera = new THREE.PerspectiveCamera(42, 1, 4, 6000);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.09;
@@ -110,6 +120,11 @@ export class FloorScene extends EventTarget {
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.container);
+    document.addEventListener('visibilitychange', () => { this.needsRender = true; });
+    this.renderer.domElement.addEventListener('webglcontextrestored', () => {
+      this.atlasTex.needsUpdate = true;
+      this.needsRender = true;
+    });
     this.resize();
   }
 
@@ -183,7 +198,7 @@ export class FloorScene extends EventTarget {
   flatLabel(texture, w, h, x, z, y) {
     const geo = new THREE.PlaneGeometry(w, h);
     geo.rotateX(-Math.PI / 2);
-    const mat = new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false });
+    const mat = decal({ map: texture });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(x, y, z);
     mesh.renderOrder = 2;
@@ -193,20 +208,20 @@ export class FloorScene extends EventTarget {
 
   buildGround() {
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(4000, 4000),
+      new THREE.PlaneGeometry(12000, 12000),
       new THREE.MeshStandardMaterial({ color: '#3a3a3a', roughness: 1 }),
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -0.05;
+    ground.position.y = -0.4;
     ground.receiveShadow = true;
     this.scene.add(ground);
 
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(this.hallW, this.hallD),
-      new THREE.MeshStandardMaterial({ color: '#f3f2ee', roughness: 0.95 }),
+      new THREE.MeshStandardMaterial({ color: '#f3f2ee', roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
     );
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0.02;
+    floor.position.y = 0;
     floor.receiveShadow = true;
     this.scene.add(floor);
 
@@ -216,7 +231,7 @@ export class FloorScene extends EventTarget {
       const w = vertical ? l.size * 1.7 : len;
       const h = vertical ? len : l.size * 1.7;
       const tex = this.textTexture(l.text, { w, h, color: l.color, vertical, weight: 800, maxFont: 200 });
-      this.flatLabel(tex, w, h, this.wx(l.x), this.wz(l.y), 0.15);
+      this.flatLabel(tex, w, h, this.wx(l.x), this.wz(l.y), 0.2);
     }
   }
 
@@ -239,13 +254,21 @@ export class FloorScene extends EventTarget {
         mesh.userData.room = room.name;
         this.rooms.push(mesh);
         const [x0, y0, x1, y1] = polyBBox(room.poly);
+        const color = room.kind === 'workshop' ? '#1d1d1d' : '#3b3b3b';
+        const cx = this.wx(room.label?.x ?? (x0 + x1) / 2), cz = this.wz(room.label?.y ?? (y0 + y1) / 2);
+        if (room.label?.rot) {
+          // Slanted rooms (Red Bull Bar): run the text along the room, as on the printed plan.
+          const { w: lw, h: lh } = room.label;
+          const tex = this.textTexture(room.name, { w: lw, h: lh, color, maxFont: 70 });
+          const mesh = this.flatLabel(tex, lw, lh, cx, cz, h + 0.1);
+          mesh.rotation.y = THREE.MathUtils.degToRad(room.label.rot);
+          continue;
+        }
         const w = x1 - x0, d = y1 - y0;
         const vertical = d > w * 1.5;
         const label = room.name.replace(' / ', ' /\n').replace('Workshop', '\nWorkshop').replace(/\n\n/g, '\n').replace(/^\n|\n$/g, '');
-        const tex = this.textTexture(vertical ? room.name : label, {
-          w, h: d, vertical, color: room.kind === 'workshop' ? '#1d1d1d' : '#3b3b3b', maxFont: 70,
-        });
-        this.flatLabel(tex, w, d, this.wx((x0 + x1) / 2), this.wz((y0 + y1) / 2), h + 0.06);
+        const tex = this.textTexture(vertical ? room.name : label, { w, h: d, vertical, color, maxFont: 70 });
+        this.flatLabel(tex, w, d, cx, cz, h + 0.1);
       }
     }
   }
@@ -266,7 +289,8 @@ export class FloorScene extends EventTarget {
 
   buildExits() {
     const tex = this.textTexture('EXIT', { w: 14, h: 8, color: '#ffffff', weight: 800, bg: '#0f8a4b', maxFont: 60 });
-    const signMat = new THREE.MeshBasicMaterial({ map: tex });
+    // Opaque sign: it must write depth, or the green post drawn after it would paint over the text.
+    const signMat = decal({ map: tex, transparent: false, depthWrite: true });
     const postMat = new THREE.MeshStandardMaterial({ color: '#0f8a4b', roughness: 0.6 });
     for (const [x, y] of this.venue.exits) {
       const g = new THREE.Group();
@@ -274,7 +298,7 @@ export class FloorScene extends EventTarget {
       post.position.y = 1;
       const sign = new THREE.Mesh(new THREE.PlaneGeometry(14, 8), signMat);
       sign.rotation.x = -Math.PI / 2;
-      sign.position.y = 2.05;
+      sign.position.y = 2.1;
       g.add(post, sign);
       g.position.set(this.wx(x), 0, this.wz(y));
       this.scene.add(g);
@@ -299,7 +323,7 @@ export class FloorScene extends EventTarget {
     this.atlasTex = new THREE.CanvasTexture(this.atlas);
     this.atlasTex.colorSpace = THREE.SRGBColorSpace;
     this.atlasTex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-    const labelMat = new THREE.MeshBasicMaterial({ map: this.atlasTex, transparent: true, depthWrite: false });
+    const labelMat = decal({ map: this.atlasTex });
     this.cell = { cols, cw, ch };
 
     this.venue.booths.forEach((b, i) => {
@@ -326,7 +350,7 @@ export class FloorScene extends EventTarget {
         uv.setXY(k, uv.getX(k) === 0 ? u0 : u1, uv.getY(k) === 0 ? v0 : v1);
       }
       const label = new THREE.Mesh(geo, labelMat);
-      label.position.set(center.x, BOOTH_H + 0.06, center.z);
+      label.position.set(center.x, BOOTH_H + 0.1, center.z);
       label.renderOrder = 3;
       label.userData.boothId = b.id;
 
@@ -667,7 +691,7 @@ export class FloorScene extends EventTarget {
           active = true;
           b.height += (b.targetH - b.height) * Math.min(1, dt * 10 + 0.08);
           b.mesh.scale.y = b.height;
-          b.label.position.y = b.height + 0.06;
+          b.label.position.y = b.height + 0.1;
         }
         if (b.star) b.star.position.set(b.center.x + b.size * 0.32, b.height + 3.2, b.center.z - b.size * 0.32);
       }
