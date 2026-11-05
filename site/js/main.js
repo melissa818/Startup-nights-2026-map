@@ -750,7 +750,33 @@ $('search').addEventListener('keydown', (e) => {
   else select(first.dataset.id, { fly: true });
   $('search').blur();
 });
-$('search').addEventListener('focus', () => { if (sheetMode.matches && sheet.state !== 'full') setSheet('full'); });
+// Phones: typing in the list sheet. iOS Safari scrolls the page when the keyboard opens so the
+// focused field stays visible; when the sheet then grew to full height (animated) it carried the
+// field up and that scroll pushed it off the top of the screen. Now the sheet jumps to full height
+// the moment the field has focus (moving it on touch would make the tap land on another element),
+// which puts the field near the top, above the keyboard, and any page scroll is undone while typing.
+function sheetFullForTyping() {
+  if (sheetMode.matches && sheet.state !== 'full') setSheet('full', false);
+}
+function keepPageAtTop() {
+  const reset = () => {
+    if (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop) {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  };
+  reset();
+  requestAnimationFrame(reset);
+  setTimeout(reset, 120);
+  setTimeout(reset, 400);
+}
+const typingInSheet = () => sheetMode.matches && ['search', 'gnInput'].includes(document.activeElement?.id);
+$('search').addEventListener('focus', () => { sheetFullForTyping(); if (sheetMode.matches) keepPageAtTop(); });
+$('gnInput').addEventListener('focus', () => { if (sheetMode.matches) keepPageAtTop(); });
+window.visualViewport?.addEventListener('scroll', () => { if (typingInSheet()) keepPageAtTop(); });
+window.visualViewport?.addEventListener('resize', () => { if (typingInSheet()) keepPageAtTop(); });
+window.addEventListener('scroll', () => { if (typingInSheet()) keepPageAtTop(); }, { passive: true });
 // The ✕ clears the search in one tap. Pressing it does not take focus from the field, so a phone
 // keyboard that is open stays open for the next search.
 $('searchClear').addEventListener('pointerdown', (e) => e.preventDefault());
@@ -789,7 +815,7 @@ function startEditNote(id) {
   $('gnSave').textContent = 'Save';
   $('gnCancel').hidden = false;
   renderList();
-  if (sheetMode.matches && sheet.state !== 'full') setSheet('full');
+  sheetFullForTyping();
   $('gnInput').focus();
 }
 
@@ -814,7 +840,7 @@ $('notesBtn').addEventListener('click', () => {
   if (ui.filter === 'notes') { setFilter('all'); return; }
   if (!requireSignIn('notes')) return;
   setFilter('notes');
-  if (sheetMode.matches && sheet.state !== 'full') setSheet('full');
+  sheetFullForTyping();
   $('gnInput').focus();
 });
 
