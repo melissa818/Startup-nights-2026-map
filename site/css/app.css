@@ -51,7 +51,6 @@ button { cursor: pointer; }
   flex: 0 0 auto;
 }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.brand-mark { width: 34px; height: 34px; flex: 0 0 auto; display: block; border-radius: 8px; background: var(--accent); }
 .brand h1 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; }
 .brand p { margin: 0; color: var(--muted); font-size: 12px; }
 .sub-short { display: none; }
@@ -514,7 +513,6 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
     padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 7px max(12px, env(safe-area-inset-left));
   }
   .brand { gap: 9px; }
-  .brand-mark { width: 32px; height: 32px; border-radius: 7px; }
   .brand p { font-size: 11.5px; line-height: 1.25; }
   .sub-long { display: none; }
   .sub-short { display: inline; }
@@ -588,7 +586,6 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .sub-long { display: none; }
   .sub-short { display: inline; }
   .brand h1 { font-size: 14px; line-height: 1.2; }
-  .brand-mark { width: 28px; height: 28px; border-radius: 6px; }
   .progress { order: 0; flex: 1 1 auto; margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
   .progress-bar { flex: 1; margin: 0; max-width: 160px; }
   .account { margin-left: 0; }
