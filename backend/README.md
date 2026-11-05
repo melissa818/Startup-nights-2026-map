@@ -14,12 +14,14 @@ project member deploys from the Langrove console.
 
 ## Data models
 
-**Visitor**: one row per person who signs in to sync.
+**Visitor**: one row per person who signs in.
 
 | field | type | notes |
 |---|---|---|
 | id | uuid | |
 | email | string | unique index; the login field of the `code` door |
+| own_startup | string | startup id of the booth this person staffs, if any |
+| welcomed | boolean | set after the first-login welcome has been shown |
 
 **BoothMark**: one row per visitor and startup.
 
@@ -35,6 +37,19 @@ project member deploys from the Langrove console.
 
 Unique index on `(visitor, startup)`, used by `upsertMany`.
 
+**BoothNote**: an exhibitor's private notes about people who visited their booth.
+
+| field | type | notes |
+|---|---|---|
+| id | uuid | |
+| owner | relation → Visitor | the author; only they can read it |
+| client_id | string | id made on the device, so notes can be written offline; unique with owner |
+| startup | string | the booth the note belongs to |
+| person / contact | string | visitor name; company, email or phone |
+| note | text | feedback, up to 4000 characters |
+| created_at / changed_at | number | epoch ms; newest edit wins |
+| deleted | boolean | tombstone, so a delete reaches the author's other devices |
+
 ## Sign-in
 
 Access **`code`**, kind `one-time`: a 6-digit code mailed by the platform, valid 10 minutes,
@@ -49,9 +64,10 @@ signing people in as `Visitor` by `email`. The app calls:
 | policy | rule |
 |---|---|
 | `boothmark.read` / `create` / `update` / `delete` | allow when `resource.visitor` is the signed-in Visitor |
-| `visitor.read` | allow when the resource is the signed-in Visitor |
+| `boothnote.read` / `create` / `update` / `delete` | allow when `resource.owner` is the signed-in Visitor |
+| `visitor.read` / `visitor.update` | allow when the resource is the signed-in Visitor |
 
-So a visitor can only ever read or write their own marks; anonymous callers get nothing.
+So a person can only ever read or write their own marks and booth notes; anonymous callers get nothing.
 
 ## Endpoints
 
@@ -59,8 +75,11 @@ So a visitor can only ever read or write their own marks; anonymous callers get 
 |---|---|---|---|
 | POST | `/visitors` | anyone | [register_visitor.js](endpoints/register_visitor.js) |
 | GET | `/visitors/me` | Visitor | [get_me.js](endpoints/get_me.js) |
+| PATCH | `/visitors/me` | Visitor | [update_me.js](endpoints/update_me.js) |
 | GET | `/marks` | Visitor | [list_marks.js](endpoints/list_marks.js) |
 | PUT | `/marks` | Visitor | [save_marks.js](endpoints/save_marks.js) |
+| GET | `/booth-notes` | Visitor | [list_booth_notes.js](endpoints/list_booth_notes.js) |
+| PUT | `/booth-notes` | Visitor | [save_booth_notes.js](endpoints/save_booth_notes.js) |
 | DELETE | `/sessions/current` | Visitor | [end_session.js](endpoints/end_session.js) |
 
 `PUT /marks` takes `{ marks: { "<startup-id>": { visited, interested, note, changed_at } } }`, keeps
@@ -73,3 +92,7 @@ whichever edit is newer per startup, and answers the visitor's full list.
 - A stale edit (`changed_at` older than the stored one) does not overwrite; a newer one does.
 - `GET /marks` without a session answers 401.
 - An invalid startup id answers 400.
+- Booth notes: a visitor sees only notes they wrote; a delete is kept as a tombstone; a stale edit
+  does not overwrite; another visitor using the same note id gets their own row; anonymous calls
+  answer 401.
+- Profile: `PATCH /visitors/me` sets `own_startup` and `welcomed` on the caller's own row only.

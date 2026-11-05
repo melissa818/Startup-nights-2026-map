@@ -52,6 +52,7 @@ export class FloorScene extends EventTarget {
     this.tween = null;
     this.clock = new THREE.Clock();
     this.onFrame = null;
+    this.needsRender = true; // draw only when something changed, to save battery on phones
     this.inset = 0;        // px of the canvas covered on the left (detail card); the view centres on the rest
     this.insetTarget = 0;
 
@@ -118,6 +119,7 @@ export class FloorScene extends EventTarget {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.applyInset();
+    this.needsRender = true;
   }
 
   // Keep the camera target centred in the part of the canvas not covered by the detail card.
@@ -412,6 +414,7 @@ export class FloorScene extends EventTarget {
   }
 
   applyBooth(b) {
+    this.needsRender = true;
     const sel = this.selected.includes(b.id);
     const { visited, interested, dim } = b.state;
     let color = BOOTH_COLORS.base;
@@ -642,15 +645,18 @@ export class FloorScene extends EventTarget {
       const dt = Math.min(this.clock.getDelta(), 0.05);
       const t = this.clock.elapsedTime;
 
+      let active = this.needsRender;
       if (this.tween) {
+        active = true;
         const k = Math.min(1, (performance.now() - this.tween.t0) / this.tween.ms);
         const e = ease(k);
         this.camera.position.lerpVectors(this.tween.p0, this.tween.p1, e);
         this.controls.target.lerpVectors(this.tween.q0, this.tween.q1, e);
         if (k >= 1) this.tween = null;
       }
-      this.controls.update();
+      if (this.controls.update()) active = true;
       if (Math.abs(this.inset - this.insetTarget) > 0.5) {
+        active = true;
         this.inset += (this.insetTarget - this.inset) * Math.min(1, dt * 8 + 0.05);
         if (Math.abs(this.inset - this.insetTarget) <= 0.5) this.inset = this.insetTarget;
         this.applyInset();
@@ -658,6 +664,7 @@ export class FloorScene extends EventTarget {
 
       for (const b of this.booths.values()) {
         if (Math.abs(b.height - b.targetH) > 0.01) {
+          active = true;
           b.height += (b.targetH - b.height) * Math.min(1, dt * 10 + 0.08);
           b.mesh.scale.y = b.height;
           b.label.position.y = b.height + 0.06;
@@ -666,6 +673,7 @@ export class FloorScene extends EventTarget {
       }
       this.pin.visible = this.selected.length > 0 && !this.topView;
       if (this.ring.visible) {
+        active = true;
         const top = Math.max(...this.selected.map((id) => this.booths.get(id).height));
         this.pin.position.y = top + 2 + Math.sin(t * 3.2) * 1.6;
         this.pin.rotation.y = t * 1.2;
@@ -674,6 +682,8 @@ export class FloorScene extends EventTarget {
         this.ring.scale.setScalar(r * (0.8 + pulse * 0.6));
         this.ring.material.opacity = 0.75 * (1 - pulse);
       }
+      if (!active) return;
+      this.needsRender = false;
       this.renderer.render(this.scene, this.camera);
       if (this.onFrame) this.onFrame();
     };

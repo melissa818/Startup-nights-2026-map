@@ -25,12 +25,13 @@
       </div>
     </div>
     <div class="progress" id="progress" aria-live="polite">
-      <div class="progress-text"><strong id="visitedCount">0</strong> of <span id="totalCount">0</span> visited · <span id="starCount">0</span> starred</div>
+      <div class="progress-text" id="progressText"><strong id="visitedCount">0</strong> of <span id="totalCount">0</span> visited · <span id="starCount">0</span> starred</div>
+      <div class="progress-text" id="progressSignedOut" hidden>Sign in to track the booths you visit</div>
       <div class="progress-bar" aria-hidden="true"><span id="progressFill"></span></div>
     </div>
     <div class="account">
       <span class="sync" id="syncStatus" hidden></span>
-      <button class="btn ghost" id="accountBtn" type="button"><span class="btn-long">Sync across devices</span><span class="btn-short">Sync</span></button>
+      <button class="btn ghost" id="accountBtn" type="button">Sign in</button>
     </div>
   </header>
 
@@ -57,6 +58,15 @@
         <span><i style="--c: var(--selected)"></i>Selected</span>
       </div>
 
+      <button type="button" class="made-by" id="madeBy" title="This map was built with Langrove. Tap to see the Langrove booth.">
+        <span class="made-long">Built with </span>Langrove
+      </button>
+
+      <div class="welcome" id="welcome" role="status" hidden>
+        <p><strong>Welcome!</strong> Have a great time at Startup Nights. This map was built by Langrove, say hi at booth 082.</p>
+        <button type="button" class="welcome-close" id="welcomeClose">Got it</button>
+      </div>
+
       <div class="tooltip" id="tooltip" role="status" hidden></div>
       <div class="gesture-hint" id="gestureHint" hidden>Drag to rotate · pinch to zoom · two fingers to move</div>
       <div class="name-tag" id="nameTag" hidden></div>
@@ -69,7 +79,8 @@
         </div>
         <p class="detail-desc" id="detailDesc"></p>
         <div class="detail-links" id="detailLinks"></div>
-        <div class="detail-actions">
+        <div id="personalSection">
+        <div class="detail-actions" id="detailActions">
           <button type="button" class="toggle visited" id="toggleVisited" aria-pressed="false">
             <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span>Mark visited</span>
@@ -79,8 +90,34 @@
             <span>Interested</span>
           </button>
         </div>
-        <label class="notes-label" for="noteInput">My notes <span id="noteSaved" class="saved" aria-live="polite"></span></label>
-        <textarea id="noteInput" rows="3" maxlength="4000" placeholder="Who did you talk to? Follow-ups, ideas…"></textarea>
+        <div id="notesBlock">
+          <label class="notes-label" for="noteInput"><span>My notes <span class="private">only you can see them</span></span> <span id="noteSaved" class="saved" aria-live="polite"></span></label>
+          <textarea id="noteInput" rows="3" maxlength="4000" placeholder="Who did you talk to? Follow-ups, ideas…"></textarea>
+        </div>
+        <div class="signin-prompt" id="signinPrompt" hidden>
+          <p>Sign in to mark booths you visited and keep private notes.</p>
+          <button type="button" class="btn primary small" id="signinFromDetail">Sign in</button>
+        </div>
+        </div>
+
+        <section class="booth-notes" id="boothNotes" hidden aria-labelledby="boothNotesTitle">
+          <h3 id="boothNotesTitle">Your booth: visitor notes <span class="count" id="boothNotesCount"></span></h3>
+          <p class="private-line">Only you can see these. Note who stopped by and their feedback.</p>
+          <form id="boothNoteForm" class="bn-form" novalidate>
+            <div class="bn-row">
+              <input id="bnPerson" type="text" maxlength="200" placeholder="Visitor name" aria-label="Visitor name" autocomplete="off">
+              <input id="bnContact" type="text" maxlength="200" placeholder="Company, email or phone" aria-label="Company, email or phone (optional)" autocomplete="off">
+            </div>
+            <textarea id="bnNote" rows="2" maxlength="4000" placeholder="Feedback, questions, follow-up…" aria-label="Feedback"></textarea>
+            <div class="bn-actions">
+              <button type="button" class="btn ghost small" id="bnExport">Export</button>
+              <button type="submit" class="btn primary small">Add note</button>
+            </div>
+          </form>
+          <ul class="bn-list" id="boothNoteList"></ul>
+        </section>
+
+        <button type="button" class="link-btn" id="ownBoothBtn"></button>
       </article>
 
       <div class="loading" id="loading">Loading the hall…</div>
@@ -109,10 +146,10 @@
           </label>
         </div>
       </div>
-      <ul class="list" id="list" role="listbox" aria-label="Startups"></ul>
+      <ul class="list" id="list" aria-label="Startups"></ul>
       <div class="side-foot">
         <button type="button" class="btn ghost small" id="exportBtn">Export my notes</button>
-        <span class="foot-note">Saved on this device<span id="footSync"></span></span>
+        <span class="foot-note" id="footNote">Sign in to save marks and notes</span>
       </div>
     </aside>
   </main>
@@ -120,8 +157,8 @@
   <dialog class="modal" id="authModal" aria-labelledby="authTitle">
     <form method="dialog" class="modal-body" id="authForm" novalidate>
       <button type="button" class="close" id="authClose" aria-label="Close">×</button>
-      <h2 id="authTitle">Sync your booth notes</h2>
-      <p class="muted" id="authIntro">Your visits and notes are saved on this device. Sign in with your email to keep them in sync across your phone and laptop.</p>
+      <h2 id="authTitle">Sign in</h2>
+      <p class="muted" id="authIntro">Sign in with your email to mark booths you visit and keep private notes. Only you can see them, on any device.</p>
       <div id="stepEmail">
         <label for="authEmail">Email</label>
         <input id="authEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
@@ -131,10 +168,12 @@
         <input id="authCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="8" placeholder="123456">
       </div>
       <div id="stepSignedIn" hidden>
-        <p>Signed in as <strong id="authWho"></strong>. Your marks sync automatically.</p>
+        <p>Signed in as <strong id="authWho"></strong>. Your marks and notes are private to this account.</p>
+        <p class="muted" id="authOwnBooth"></p>
       </div>
       <p class="form-error" id="authError" role="alert"></p>
       <div class="modal-actions">
+        <button type="button" class="btn ghost" id="authBrowse" hidden>Just browse the map</button>
         <button type="button" class="btn ghost" id="authBack" hidden>Use another email</button>
         <button type="submit" class="btn primary" id="authSubmit">Send code</button>
       </div>

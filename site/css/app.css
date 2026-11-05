@@ -287,6 +287,76 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
 .form-error { color: var(--danger); min-height: 1.2em; margin: 10px 0 0; font-size: 13px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 
+/* ---------- account-only features ---------- */
+.private { color: var(--muted); font-weight: 400; font-size: 11.5px; margin-left: 4px; }
+.private::before { content: "· "; }
+.signin-prompt {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; border-radius: 10px; background: #262626; border: 1px solid #343434;
+}
+.signin-prompt p { margin: 0; font-size: 13px; color: #d7d7d3; }
+.tag.own { background: rgba(46, 189, 107, .16); color: #5fd894; }
+.link-btn {
+  display: block; margin: 12px 0 0; padding: 4px 0; border: 0; background: none;
+  color: var(--muted); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px; text-align: left;
+}
+.link-btn:hover { color: var(--text); }
+.item.mine .num { background: var(--visited); color: #fff; }
+.item.mine { border-color: rgba(46, 189, 107, .35); margin-bottom: 4px; }
+.no-backend .marks, .no-backend .chip:not([data-filter="all"]), .no-backend #exportBtn, .no-backend .link-btn { display: none !important; }
+
+/* Visitor notes on your own booth (exhibitors) */
+.booth-notes h3 { margin: 4px 0 2px; font-size: 14.5px; }
+.booth-notes .count { color: var(--muted); font-weight: 500; }
+.private-line { margin: 0 0 10px; font-size: 12.5px; color: var(--muted); }
+.bn-form { display: grid; gap: 8px; }
+.bn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bn-form input, .bn-form textarea {
+  width: 100%; padding: 9px 10px; border-radius: 9px; min-height: 0;
+  background: #121212; border: 1px solid #3a3a3a; color: var(--text);
+}
+.bn-form input:focus, .bn-form textarea:focus { border-color: var(--accent); outline: none; }
+.bn-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.bn-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.bn-list li { position: relative; padding: 9px 40px 9px 11px; border-radius: 10px; background: #262626; border: 1px solid #333; }
+.bn-list li.bn-empty { padding: 10px 12px; color: var(--muted); font-size: 13px; text-align: center; background: transparent; border-style: dashed; }
+.bn-head { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0 4px; align-items: baseline; }
+.bn-head strong { color: var(--text); }
+.bn-head time { margin-left: auto; font-size: 11.5px; }
+.bn-list p { margin: 4px 0 0; font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bn-del {
+  position: absolute; top: 4px; right: 4px; width: 32px; height: 32px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--muted); font-size: 18px;
+}
+.bn-del:hover { background: #333; color: var(--text); }
+
+/* "Built with Langrove" tag, top right of the map */
+.made-by {
+  position: absolute; top: 14px; right: 14px; z-index: 4;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 99px;
+  background: rgba(28, 28, 28, .82); border: 1px solid var(--line); backdrop-filter: blur(8px);
+  color: #cfcfca; font-size: 11.5px; font-weight: 600; letter-spacing: .01em;
+}
+.made-by::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--visited); }
+.made-by:hover { color: var(--text); border-color: #4a4a4a; }
+
+/* First-login welcome */
+.welcome {
+  position: absolute; top: 66px; left: 50%; transform: translateX(-50%); z-index: 6;
+  display: flex; align-items: center; gap: 14px;
+  width: max-content; max-width: min(460px, calc(100% - 24px));
+  padding: 12px 12px 12px 16px; border-radius: 12px;
+  background: rgba(22, 22, 22, .96); border: 1px solid #3c3c3c; border-left: 3px solid var(--accent);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .4);
+}
+.welcome p { margin: 0; font-size: 13.5px; line-height: 1.4; }
+.map-pane:has(.welcome:not([hidden])) .legend { display: none; }
+.welcome-close {
+  flex: 0 0 auto; padding: 7px 12px; border-radius: 8px; border: 0;
+  background: var(--accent); color: #1a1a1a; font-weight: 700; font-size: 13px;
+}
+
 /* ---------- detail card when it lives in the sidebar (phones, short landscape) ---------- */
 .sidebar > .detail {
   position: absolute; left: 0; right: 0; bottom: 0; top: auto; width: auto;
@@ -336,6 +406,12 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .search input { padding: 11px 0; }
   .item { padding: 2px 2px 2px 3px; }
   .item-main { min-height: 52px; }
+  .made-by { min-height: 34px; padding: 6px 12px; }
+  .link-btn { padding: 12px 0; }
+  .bn-del { width: 44px; height: 44px; top: 0; right: 0; }
+  .bn-list li { padding-right: 48px; }
+  .bn-form input, .bn-form textarea { font-size: 16px; }
+  .welcome-close { min-height: 40px; }
 }
 
 /* ---------- small screens: map on top, list below ---------- */
@@ -368,6 +444,18 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .side-foot { padding: 6px 12px calc(6px + env(safe-area-inset-bottom)); }
 }
 
+@media (max-width: 860px) {
+  .made-by { top: 8px; right: 8px; }
+  .welcome { top: auto; bottom: 8px; }
+}
+@media (max-width: 520px) {
+  .made-long { display: none; }
+  .bn-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 380px) {
+  .made-by { top: 58px; }
+}
+
 /* Small phones: shorter labels, more room for the list. */
 @media (max-width: 860px) and (max-height: 720px) {
   .map-pane { flex-basis: 40%; }
@@ -394,6 +482,7 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .sidebar { position: relative; flex: 0 0 min(340px, 44vw); border-top: 0; border-left: 1px solid var(--line); padding-right: env(safe-area-inset-right); }
   .map-tools { left: max(8px, env(safe-area-inset-left)); }
   .legend { display: none; }
+  .made-long { display: none; }
   .list-meta, .side-foot { display: none; }
   .side-head { padding: 6px 8px 4px; }
   .filters { margin-top: 6px; }

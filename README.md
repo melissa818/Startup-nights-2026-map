@@ -7,11 +7,16 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
   its booth, or click a booth on the 3D floor plan to see who is there.
 - **Startup details.** Each selection shows a short description, category and a link to the startup's
   website (from web research, see below).
-- **Track your visit.** Mark booths as *visited* (turns green) or *interested* (turns blue with a star),
-  and keep notes per startup. Filter the list by Starred, To visit, Visited or Notes, and export
-  everything as a CSV after the event.
-- **Works without an account.** Marks are saved on the device. Signing in with an email code
-  syncs them across phone and laptop through the Langrove backend.
+- **Track your visit.** Signed-in visitors mark booths as *visited* (turns green) or *interested*
+  (turns blue with a star) and keep notes per startup. Filter the list by Starred, To visit, Visited
+  or Notes, and export everything as a CSV after the event.
+- **Private by account.** Sign-in is a 6-digit email code. Marks and notes belong to the account and
+  only its owner can read them (Langrove policies); signing out clears them from the device. Anyone
+  can browse the map without an account.
+- **Exhibitors.** On their own booth ("Exhibiting at this booth?"), signed-in exhibitors keep private
+  notes on the people who stopped by: name, contact and feedback, exportable as CSV.
+- **First sign-in.** New users see a one-line welcome and the Langrove booth highlighted; a small
+  "Built with Langrove" tag on the map jumps to that booth.
 
 ## Structure
 

@@ -1,28 +1,36 @@
-// Per-visitor booth marks: visited, interested (starred) and a note per startup.
-// Always saved on this device; synced to the Langrove backend when the visitor signs in.
+// Personal data for the signed-in visitor, kept private by the backend's policies:
+//   marks       visited / interested / note per startup
+//   boothNotes  an exhibitor's notes about people who visited their own booth
+// Both are cached per account on this device (so they work with a flaky connection) and
+// synced to the Langrove backend; newest edit wins. Signing out clears the device cache.
 
-const LOCAL_KEY = 'sn26.marks.v1';
-const SYNC_DELAY_MS = 1200;
+const LEGACY_KEY = 'sn26.marks.v1'; // marks saved before sign-in existed
+const SYNC_DELAY_MS = 1000;
 
-function readLocal() {
+const readJSON = (key) => {
   try {
-    const raw = localStorage.getItem(LOCAL_KEY);
-    const parsed = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === 'object' ? parsed : {};
+    const v = JSON.parse(localStorage.getItem(key) || 'null');
+    return v && typeof v === 'object' ? v : null;
   } catch {
-    return {};
+    return null;
   }
-}
-
-function writeLocal(marks) {
+};
+const writeJSON = (key, value) => {
   try {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(marks));
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    /* private mode or storage full: marks still live for this visit */
+    /* private mode or storage full: data still syncs to the account */
   }
-}
+};
+const removeKey = (key) => {
+  try { localStorage.removeItem(key); } catch { /* ignore */ }
+};
 
-const isEmpty = (m) => !m || (!m.visited && !m.interested && !(m.note || '').trim());
+export function newId() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  return [...b].map((x) => x.toString(16).padStart(2, '0')).join('').replace(/(.{8})(.{4})(.{4})(.{4})/, '$1-$2-$3-$4-');
+}
 
 async function api(method, path, body) {
   const res = await fetch(path, {
@@ -32,11 +40,7 @@ async function api(method, path, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   let data = null;
-  try {
-    data = await res.json();
-  } catch {
-    /* no body */
-  }
+  try { data = await res.json(); } catch { /* no body */ }
   if (!res.ok) {
     const err = new Error((data && (data.detail || data.error)) || `HTTP ${res.status}`);
     err.status = res.status;
@@ -45,40 +49,116 @@ async function api(method, path, body) {
   return data;
 }
 
+// One synced collection: an object of items keyed by id, each with changed_at.
+class Collection {
+  constructor(store, { name, endpoint, field, keyOf }) {
+    Object.assign(this, { store, name, endpoint, field, keyOf });
+    this.items = {};
+    this.dirty = new Set();
+    this.timer = null;
+  }
+
+  get cacheKey() { return `sn26.${this.store.user.id}.${this.name}`; }
+
+  load() {
+    this.items = readJSON(this.cacheKey) || {};
+    this.dirty = new Set(readJSON(`${this.cacheKey}.dirty`) || []);
+  }
+
+  save() {
+    writeJSON(this.cacheKey, this.items);
+    writeJSON(`${this.cacheKey}.dirty`, [...this.dirty]);
+  }
+
+  clear(forget) {
+    clearTimeout(this.timer);
+    if (forget && this.store.user) {
+      removeKey(this.cacheKey);
+      removeKey(`${this.cacheKey}.dirty`);
+    }
+    this.items = {};
+    this.dirty = new Set();
+  }
+
+  put(id, item) {
+    this.items[id] = { ...item, changed_at: Date.now() };
+    this.dirty.add(id);
+    this.save();
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.push(), SYNC_DELAY_MS);
+  }
+
+  absorb(list) {
+    let changed = false;
+    for (const s of list || []) {
+      const id = this.keyOf(s);
+      const local = this.items[id];
+      if (!local || (s.changed_at || 0) > (local.changed_at || 0)) {
+        const { startup, ...rest } = s;
+        this.items[id] = this.name === 'marks' ? rest : s;
+        changed = true;
+      }
+    }
+    if (changed) this.save();
+    return changed;
+  }
+
+  async push(all = false) {
+    if (!this.store.user) return;
+    const ids = all ? Object.keys(this.items) : [...this.dirty];
+    if (!ids.length && !all) return;
+    const payload = {};
+    for (const id of ids) if (this.items[id]) payload[id] = this.items[id];
+    this.store.setSync('syncing');
+    try {
+      const res = await api('PUT', this.endpoint, { [this.field]: payload });
+      ids.forEach((id) => this.dirty.delete(id));
+      const changed = this.absorb(res[this.field]);
+      this.save();
+      this.store.setSync('synced');
+      if (changed) this.store.emit('change', { collection: this.name });
+    } catch (e) {
+      this.store.handleSyncError(e, () => this.push());
+    }
+  }
+}
+
 export class MarkStore extends EventTarget {
   constructor() {
     super();
-    this.marks = readLocal();
-    this.user = null;          // { id, email } when signed in
-    this.syncState = 'local';  // local | syncing | synced | error | offline
-    this.dirty = new Set();
-    this.timer = null;
-    // The backend lives on the same origin as the page; a file:// copy works locally only.
+    this.user = null;          // { id, email, own_startup, welcomed } when signed in
+    this.syncState = 'idle';
     this.backend = location.protocol.startsWith('http');
+    this.marks = new Collection(this, { name: 'marks', endpoint: '/marks', field: 'marks', keyOf: (m) => m.startup });
+    this.boothNotes = new Collection(this, { name: 'booth-notes', endpoint: '/booth-notes', field: 'notes', keyOf: (n) => n.id });
   }
 
+  get signedIn() { return !!this.user; }
+
+  emit(type, detail) { this.dispatchEvent(new CustomEvent(type, { detail })); }
+
+  setSync(state) {
+    this.syncState = state;
+    this.emit('sync', { state });
+  }
+
+  // ----- marks -----
+
   get(id) {
-    return this.marks[id] || { visited: false, interested: false, note: '', changed_at: 0 };
+    return this.marks.items[id] || { visited: false, interested: false, note: '', changed_at: 0 };
   }
 
   set(id, patch) {
-    const next = { ...this.get(id), ...patch, changed_at: Date.now() };
-    this.marks[id] = next;
-    writeLocal(this.marks);
-    this.emit('change', { id });
-    if (this.user) {
-      this.dirty.add(id);
-      clearTimeout(this.timer);
-      this.timer = setTimeout(() => this.push(), SYNC_DELAY_MS);
-    }
+    if (!this.user) return false;
+    this.marks.put(id, { ...this.get(id), ...patch });
+    this.emit('change', { collection: 'marks', id });
+    return true;
   }
 
   counts(ids) {
-    let visited = 0;
-    let interested = 0;
-    let notes = 0;
+    let visited = 0, interested = 0, notes = 0;
     for (const id of ids) {
-      const m = this.marks[id];
+      const m = this.marks.items[id];
       if (!m) continue;
       if (m.visited) visited++;
       if (m.interested) interested++;
@@ -87,97 +167,98 @@ export class MarkStore extends EventTarget {
     return { visited, interested, notes };
   }
 
-  emit(type, detail) {
-    this.dispatchEvent(new CustomEvent(type, { detail }));
+  // ----- an exhibitor's notes about visitors to their own booth -----
+
+  notesFor(startup) {
+    return Object.entries(this.boothNotes.items)
+      .filter(([, n]) => n.startup === startup && !n.deleted)
+      .map(([id, n]) => ({ id, ...n }))
+      .sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
   }
 
-  setSync(state) {
-    this.syncState = state;
-    this.emit('sync', { state });
+  addBoothNote(startup, { person, contact, note }) {
+    if (!this.user) return null;
+    const id = newId();
+    this.boothNotes.put(id, { id, startup, person, contact, note, created_at: Date.now(), deleted: false });
+    this.emit('change', { collection: 'booth-notes', id });
+    return id;
   }
 
-  // Merge server marks into local ones; the newest edit of each startup wins.
-  absorb(serverMarks) {
-    let changed = false;
-    for (const s of serverMarks || []) {
-      const local = this.marks[s.startup];
-      if (!local || (s.changed_at || 0) > (local.changed_at || 0)) {
-        this.marks[s.startup] = {
-          visited: !!s.visited,
-          interested: !!s.interested,
-          note: s.note || '',
-          changed_at: s.changed_at || 0,
-        };
-        changed = true;
-      }
-    }
-    if (changed) {
-      writeLocal(this.marks);
-      this.emit('change', { id: null });
+  deleteBoothNote(id) {
+    const n = this.boothNotes.items[id];
+    if (!n || !this.user) return;
+    this.boothNotes.put(id, { ...n, deleted: true });
+    this.emit('change', { collection: 'booth-notes', id });
+  }
+
+  // ----- profile -----
+
+  async updateProfile(patch) {
+    if (!this.user) return;
+    Object.assign(this.user, patch);
+    this.emit('auth', { user: this.user });
+    try {
+      const body = { ...patch };
+      if ('own_startup' in body) body.own_startup = body.own_startup || '';
+      this.user = await api('PATCH', '/visitors/me', body);
+      this.emit('auth', { user: this.user });
+    } catch (e) {
+      this.handleSyncError(e);
     }
   }
+
+  // ----- session -----
 
   async init() {
     if (!this.backend) return;
     try {
-      this.user = await api('GET', '/visitors/me');
-      this.emit('auth', { user: this.user });
-      await this.fullSync();
+      const me = await api('GET', '/visitors/me');
+      await this.startSession(me);
     } catch (e) {
       this.user = null;
-      if (e.status === 404) this.backend = false; // served without the backend (e.g. a plain static host)
+      if (e.status === 404) this.backend = false; // static copy without the backend
       else if (e.status !== 401 && e.status !== 403) this.setSync('offline');
-    }
-  }
-
-  // Send every local mark once (the server keeps whichever edit is newer), then take the merged list.
-  async fullSync() {
-    if (!this.user) return;
-    this.setSync('syncing');
-    try {
-      const payload = {};
-      for (const [id, m] of Object.entries(this.marks)) {
-        if (!isEmpty(m) || m.changed_at) payload[id] = m;
-      }
-      const res = await api('PUT', '/marks', { marks: payload });
-      this.dirty.clear();
-      this.absorb(res.marks);
-      this.setSync('synced');
-    } catch (e) {
-      this.handleSyncError(e);
-    }
-  }
-
-  async push() {
-    if (!this.user || this.dirty.size === 0) return;
-    const ids = [...this.dirty];
-    this.dirty.clear();
-    const payload = {};
-    for (const id of ids) payload[id] = this.get(id);
-    this.setSync('syncing');
-    try {
-      const res = await api('PUT', '/marks', { marks: payload });
-      this.absorb(res.marks);
-      this.setSync('synced');
-    } catch (e) {
-      ids.forEach((id) => this.dirty.add(id));
-      this.handleSyncError(e);
-    }
-  }
-
-  handleSyncError(e) {
-    if (e.status === 401 || e.status === 403) {
-      this.user = null;
       this.emit('auth', { user: null });
-      this.setSync('local');
+    }
+  }
+
+  async startSession(me) {
+    this.user = me;
+    this.marks.load();
+    this.boothNotes.load();
+    // Marks made on this device before signing in move into the account.
+    const legacy = readJSON(LEGACY_KEY);
+    if (legacy) {
+      for (const [id, m] of Object.entries(legacy)) {
+        const cur = this.marks.items[id];
+        if (!cur || (m.changed_at || 0) > (cur.changed_at || 0)) {
+          this.marks.items[id] = m;
+          this.marks.dirty.add(id);
+        }
+      }
+      this.marks.save();
+      removeKey(LEGACY_KEY);
+    }
+    this.emit('auth', { user: this.user });
+    this.emit('change', { collection: null });
+    await Promise.all([this.marks.push(true), this.boothNotes.push(true)]);
+  }
+
+  handleSyncError(e, retry) {
+    if (e.status === 401 || e.status === 403) {
+      // Session ended elsewhere: forget this account's data on the device.
+      this.marks.clear(true);
+      this.boothNotes.clear(true);
+      this.user = null;
+      this.emit('auth', { user: null, expired: true });
+      this.emit('change', { collection: null });
+      this.setSync('idle');
     } else {
       this.setSync('error');
-      clearTimeout(this.timer);
-      this.timer = setTimeout(() => this.push(), 15000);
+      if (retry) setTimeout(retry, 15000);
     }
   }
 
-  // Sign-in with a one-time code mailed by the platform.
   async requestCode(email) {
     await api('POST', '/visitors', { email });
     await api('POST', '/_auth/code/begin', { email });
@@ -185,20 +266,23 @@ export class MarkStore extends EventTarget {
 
   async verifyCode(email, code) {
     await api('POST', '/_auth/code/verify', { email, code });
-    this.user = await api('GET', '/visitors/me');
-    this.emit('auth', { user: this.user });
-    await this.fullSync();
+    const me = await api('GET', '/visitors/me');
+    await this.startSession(me);
+    return me;
   }
 
   async signOut() {
     try {
-      await this.push();
+      await Promise.all([this.marks.push(), this.boothNotes.push()]);
       await api('DELETE', '/sessions/current');
     } catch {
       /* the session may already be gone */
     }
+    this.marks.clear(true);
+    this.boothNotes.clear(true);
     this.user = null;
     this.emit('auth', { user: null });
-    this.setSync('local');
+    this.emit('change', { collection: null });
+    this.setSync('idle');
   }
 }

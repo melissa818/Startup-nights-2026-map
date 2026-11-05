@@ -7,6 +7,11 @@ const fold = (s) => String(s ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').to
 
 const ICON_CHECK = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_STAR = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 2.5l2.3 4.8 5.2.7-3.8 3.6.9 5.2L10 14.3l-4.6 2.5.9-5.2L2.5 8l5.2-.7z" fill="currentColor"/></svg>';
+const LANGROVE_ID = 'langrove';
+const BROWSE_KEY = 'sn26.browse';
+
+const storageGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const storageSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } };
 
 // ---------- data ----------
 
@@ -33,10 +38,13 @@ function boothLabel(booths) {
   return runs.map(([a, b]) => (a === b ? pad(a) : `${pad(a)}–${pad(b)}`)).join(', ');
 }
 
+const ownStartup = () => (store.user && store.user.own_startup) || null;
+
 // ---------- state ----------
 
 const ui = {
   selected: null,
+  spotlight: null, // a booth highlighted without opening its card (first-login welcome)
   filter: 'all',
   query: '',
   sort: 'name',
@@ -91,10 +99,22 @@ function refreshBooths() {
 }
 
 function refreshProgress() {
+  const signedIn = store.signedIn;
+  $('progressText').hidden = !signedIn;
+  $('progressSignedOut').hidden = signedIn || !store.backend;
   const c = store.counts(startups.map((s) => s.id));
   $('visitedCount').textContent = c.visited;
   $('starCount').textContent = c.interested;
   $('progressFill').style.width = `${(c.visited / startups.length) * 100}%`;
+}
+
+// ---------- sign-in prompts ----------
+
+// Personal features need an account so that notes stay private to their author.
+function requireSignIn(reason) {
+  if (store.signedIn) return true;
+  openAuth(reason);
+  return false;
 }
 
 // ---------- list ----------
@@ -115,16 +135,26 @@ function sorted(list) {
 function renderList() {
   const items = sorted(startups.filter(matches));
   $('resultCount').textContent = filtering() ? `${items.length} of ${startups.length} exhibitors` : `${startups.length} exhibitors`;
-  if (!items.length) {
-    $('list').innerHTML = `<li class="empty">${ui.filter === 'all' ? 'No exhibitor matches your search.' : 'Nothing here yet. Mark booths from the map or the list.'}</li>`;
-    return;
+  const rows = [];
+  const own = byId.get(ownStartup());
+  if (own && !filtering()) {
+    const n = store.notesFor(own.id).length;
+    rows.push(`<li class="item mine" data-id="${esc(own.id)}" ${ui.selected === own.id ? 'aria-current="true"' : ''}>
+      <button type="button" class="item-main" data-act="open" aria-label="Your booth, ${esc(own.name)}">
+        <span class="num">${esc(own.booths[0])}</span>
+        <span class="txt"><span class="name">Your booth · ${esc(own.name)}</span><span class="sub">${n} visitor note${n === 1 ? '' : 's'}</span></span>
+      </button>
+    </li>`);
   }
-  $('list').innerHTML = items.map((s) => {
+  if (!items.length) {
+    rows.push(`<li class="empty">${ui.filter === 'all' ? 'No exhibitor matches your search.' : 'Nothing here yet. Mark booths from the map or the list.'}</li>`);
+  }
+  for (const s of items) {
     const m = store.get(s.id);
     const cls = ['item', m.visited ? 'is-visited' : '', m.interested ? 'is-star' : ''].join(' ');
     const sub = [s.category, `Booth ${boothLabel(s.booths)}`, (m.note || '').trim() ? 'Has note' : ''].filter(Boolean).join(' · ');
     const num = s.booths.length > 1 ? `${s.booths[0]}+` : s.booths[0];
-    return `<li class="${cls}" data-id="${esc(s.id)}" ${ui.selected === s.id ? 'aria-current="true"' : ''}>
+    rows.push(`<li class="${cls}" data-id="${esc(s.id)}" ${ui.selected === s.id ? 'aria-current="true"' : ''}>
       <button type="button" class="item-main" data-act="open" aria-label="${esc(s.name)}, booth ${esc(boothLabel(s.booths))}">
         <span class="num">${esc(num)}</span>
         <span class="txt"><span class="name">${esc(s.name)}</span><span class="sub">${esc(sub)}</span></span>
@@ -133,8 +163,9 @@ function renderList() {
         <button type="button" class="mark-btn v ${m.visited ? 'on' : ''}" data-act="visited" aria-pressed="${m.visited}" aria-label="Visited ${esc(s.name)}" title="Visited">${ICON_CHECK}</button>
         <button type="button" class="mark-btn s ${m.interested ? 'on' : ''}" data-act="star" aria-pressed="${m.interested}" aria-label="Interested in ${esc(s.name)}" title="Interested">${ICON_STAR}</button>
       </span>
-    </li>`;
-  }).join('');
+    </li>`);
+  }
+  $('list').innerHTML = rows.join('');
 }
 
 $('list').addEventListener('click', (e) => {
@@ -142,16 +173,18 @@ $('list').addEventListener('click', (e) => {
   const li = e.target.closest('li[data-id]');
   if (!btn || !li) return;
   const id = li.dataset.id;
+  const act = btn.dataset.act;
+  if (act === 'open') { select(id, { fly: true }); return; }
+  if (!requireSignIn('mark')) return;
   const m = store.get(id);
-  if (btn.dataset.act === 'visited') store.set(id, { visited: !m.visited });
-  else if (btn.dataset.act === 'star') store.set(id, { interested: !m.interested });
-  else select(id, { fly: true });
+  if (act === 'visited') store.set(id, { visited: !m.visited });
+  else if (act === 'star') store.set(id, { interested: !m.interested });
 });
 
 // Scroll only the list (scrollIntoView would also scroll the page on phones).
 function scrollListTo(id) {
   const list = $('list');
-  const li = list.querySelector(`li[data-id="${CSS.escape(id)}"]`);
+  const li = list.querySelector(`li[data-id="${CSS.escape(id)}"]:not(.mine)`);
   if (!li) return;
   const top = li.offsetTop - list.offsetTop;
   if (top < list.scrollTop || top + li.offsetHeight > list.scrollTop + list.clientHeight) {
@@ -167,18 +200,34 @@ let noteFor = null;
 
 function flushNote() {
   clearTimeout(noteTimer);
-  if (noteFor && store.get(noteFor).note !== $('noteInput').value) {
+  if (noteFor && store.signedIn && store.get(noteFor).note !== $('noteInput').value) {
     store.set(noteFor, { note: $('noteInput').value });
     $('noteSaved').textContent = 'Saved';
   }
+}
+
+const timeFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+
+function renderBoothNotes(s) {
+  const notes = store.notesFor(s.id);
+  $('boothNotesCount').textContent = notes.length ? `(${notes.length})` : '';
+  $('boothNoteList').innerHTML = notes.length
+    ? notes.map((n) => `<li data-note="${esc(n.id)}">
+        <div class="bn-head"><strong>${esc(n.person || 'Visitor')}</strong>${n.contact ? ` · <span>${esc(n.contact)}</span>` : ''}<time>${esc(timeFmt.format(new Date(n.created_at || Date.now())))}</time></div>
+        ${n.note ? `<p>${esc(n.note)}</p>` : ''}
+        <button type="button" class="bn-del" data-del="${esc(n.id)}" aria-label="Delete note about ${esc(n.person || 'visitor')}">×</button>
+      </li>`).join('')
+    : '<li class="bn-empty">No visitor notes yet.</li>';
 }
 
 function renderDetail() {
   const s = byId.get(ui.selected);
   if (!s) { detail.hidden = true; updateInset(); return; }
   const m = store.get(s.id);
+  const isOwn = ownStartup() === s.id;
   const onMap = s.booths.some((b) => mapBooths.has(b));
   const chips = [`<span class="tag booth">Booth ${esc(boothLabel(s.booths))}</span>`];
+  if (isOwn) chips.push('<span class="tag own">Your booth</span>');
   if (s.category) chips.push(`<span class="tag">${esc(s.category)}</span>`);
   if (s.status === 'partial' || s.status === 'pending') chips.push('<span class="tag warn">Details unverified</span>');
   $('detailChips').innerHTML = chips.join('');
@@ -208,11 +257,19 @@ function renderDetail() {
   }
   $('detailLinks').innerHTML = links.join('');
 
+  // Visitors: visited / interested / private note. Exhibitors on their own booth: visitor notes.
+  const signedIn = store.signedIn;
+  $('personalSection').hidden = isOwn || !store.backend;
+  $('boothNotes').hidden = !isOwn;
+  $('detailActions').hidden = !signedIn;
+  $('notesBlock').hidden = !signedIn;
+  $('signinPrompt').hidden = signedIn;
   const v = $('toggleVisited'), st = $('toggleStar');
   v.setAttribute('aria-pressed', m.visited);
   v.querySelector('span').textContent = m.visited ? 'Visited' : 'Mark visited';
   st.setAttribute('aria-pressed', m.interested);
   st.querySelector('span').textContent = m.interested ? 'Starred' : 'Interested';
+  if (isOwn) renderBoothNotes(s);
 
   if (noteFor !== s.id) {
     $('noteInput').value = m.note || '';
@@ -221,6 +278,10 @@ function renderDetail() {
   } else if (document.activeElement !== $('noteInput')) {
     $('noteInput').value = m.note || '';
   }
+
+  const ownBtn = $('ownBoothBtn');
+  ownBtn.hidden = s.status === 'surprise' || !store.backend;
+  ownBtn.textContent = isOwn ? 'Not your booth? Remove it from your account' : 'Exhibiting at this booth? Keep notes on your visitors';
   detail.hidden = false;
   updateInset();
 }
@@ -235,6 +296,7 @@ function select(id, { fly = false, scroll = false } = {}) {
   flushNote();
   const s = id ? byId.get(id) : null;
   ui.selected = s ? s.id : null;
+  if (ui.spotlight && ui.spotlight !== ui.selected) hideWelcome();
   scene.select(s ? s.booths : null);
   if (s && fly) scene.focus(s.booths);
   renderDetail();
@@ -249,10 +311,12 @@ function select(id, { fly = false, scroll = false } = {}) {
 
 $('detailClose').addEventListener('click', () => select(null));
 $('toggleVisited').addEventListener('click', () => {
+  if (!requireSignIn('mark')) return;
   const m = store.get(ui.selected);
   store.set(ui.selected, { visited: !m.visited });
 });
 $('toggleStar').addEventListener('click', () => {
+  if (!requireSignIn('mark')) return;
   const m = store.get(ui.selected);
   store.set(ui.selected, { interested: !m.interested });
 });
@@ -262,6 +326,48 @@ $('noteInput').addEventListener('input', () => {
   noteTimer = setTimeout(flushNote, 600);
 });
 $('noteInput').addEventListener('blur', flushNote);
+$('signinFromDetail').addEventListener('click', () => openAuth('mark'));
+
+$('ownBoothBtn').addEventListener('click', async () => {
+  if (!requireSignIn('booth')) return;
+  const s = byId.get(ui.selected);
+  if (!s) return;
+  const isOwn = ownStartup() === s.id;
+  await store.updateProfile({ own_startup: isOwn ? null : s.id });
+  renderList();
+  renderDetail();
+  if (!isOwn) $('bnPerson').focus();
+});
+
+$('boothNoteForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const s = byId.get(ui.selected);
+  if (!s || !requireSignIn('booth')) return;
+  const person = $('bnPerson').value.trim();
+  const contact = $('bnContact').value.trim();
+  const note = $('bnNote').value.trim();
+  if (!person && !contact && !note) { $('bnPerson').focus(); return; }
+  store.addBoothNote(s.id, { person, contact, note });
+  $('bnPerson').value = '';
+  $('bnContact').value = '';
+  $('bnNote').value = '';
+  $('bnPerson').focus();
+});
+
+$('boothNoteList').addEventListener('click', (e) => {
+  const del = e.target.closest('[data-del]');
+  if (!del) return;
+  if (confirm('Delete this visitor note?')) store.deleteBoothNote(del.dataset.del);
+});
+
+$('bnExport').addEventListener('click', () => {
+  const s = byId.get(ui.selected);
+  if (!s) return;
+  const notes = store.notesFor(s.id);
+  if (!notes.length) return;
+  downloadCsv(`${s.id}-visitor-notes.csv`, ['Time', 'Visitor', 'Contact', 'Note'],
+    notes.map((n) => [new Date(n.created_at).toLocaleString(), n.person, n.contact, n.note]));
+});
 
 // The detail card floats over the map on wide screens and sits above the list on phones.
 const narrow = window.matchMedia('(max-width: 860px), (max-height: 560px) and (orientation: landscape)');
@@ -299,7 +405,7 @@ scene.addEventListener('pick', (e) => {
 
 const nameTag = $('nameTag');
 scene.onFrame = () => {
-  const s = byId.get(ui.selected);
+  const s = byId.get(ui.selected || ui.spotlight);
   const p = s ? scene.screenPoint(s.booths) : null;
   if (!p) { nameTag.hidden = true; return; }
   nameTag.textContent = s.name;
@@ -320,6 +426,29 @@ $('view2d').addEventListener('click', () => setView(true));
 $('zoomIn').addEventListener('click', () => scene.zoomBy(0.7));
 $('zoomOut').addEventListener('click', () => scene.zoomBy(1.4));
 $('resetView').addEventListener('click', () => scene.resetView(true));
+$('madeBy').addEventListener('click', () => select(LANGROVE_ID, { fly: true, scroll: true }));
+
+// ---------- first-login welcome: highlight the Langrove booth with a short note ----------
+
+function showWelcome() {
+  const s = byId.get(LANGROVE_ID);
+  if (!s) return;
+  select(null);
+  ui.spotlight = s.id;
+  scene.select(s.booths);
+  scene.focus(s.booths);
+  $('welcome').hidden = false;
+  $('welcomeClose').focus({ preventScroll: true });
+}
+
+function hideWelcome() {
+  if (!ui.spotlight) return;
+  ui.spotlight = null;
+  $('welcome').hidden = true;
+  if (!ui.selected) scene.select(null);
+}
+
+$('welcomeClose').addEventListener('click', hideWelcome);
 
 // ---------- search, filters, sort ----------
 
@@ -334,19 +463,23 @@ $('search').addEventListener('input', () => {
 });
 $('search').addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
-  const first = $('list').querySelector('li[data-id]');
+  const first = $('list').querySelector('li[data-id]:not(.mine)');
   if (first) select(first.dataset.id, { fly: true });
 });
 
+function setFilter(value) {
+  ui.filter = value;
+  for (const c of document.querySelectorAll('.chip[data-filter]')) {
+    c.classList.toggle('active', c.dataset.filter === value);
+    c.setAttribute('aria-pressed', c.dataset.filter === value);
+  }
+  renderList();
+  refreshBooths();
+}
 for (const chip of document.querySelectorAll('.chip[data-filter]')) {
   chip.addEventListener('click', () => {
-    ui.filter = chip.dataset.filter;
-    for (const c of document.querySelectorAll('.chip[data-filter]')) {
-      c.classList.toggle('active', c === chip);
-      c.setAttribute('aria-pressed', c === chip);
-    }
-    renderList();
-    refreshBooths();
+    if (chip.dataset.filter !== 'all' && !requireSignIn('mark')) return;
+    setFilter(chip.dataset.filter);
   });
 }
 $('sort').addEventListener('change', () => {
@@ -356,7 +489,7 @@ $('sort').addEventListener('change', () => {
 
 document.addEventListener('keydown', (e) => {
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
-  if (e.key === 'Escape' && !$('authModal').open) select(null);
+  if (e.key === 'Escape' && !$('authModal').open) { hideWelcome(); select(null); }
   if (e.key === '/' && !typing) { e.preventDefault(); $('search').focus(); }
 });
 
@@ -371,7 +504,21 @@ store.addEventListener('change', () => {
 
 // ---------- export ----------
 
+function downloadCsv(filename, header, rows) {
+  const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const lines = [header.map(cell).join(','), ...rows.map((r) => r.map(cell).join(','))];
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 $('exportBtn').addEventListener('click', () => {
+  if (!requireSignIn('mark')) return;
   const rows = startups
     .map((s) => ({ s, m: store.get(s.id) }))
     .filter(({ m }) => m.visited || m.interested || (m.note || '').trim());
@@ -380,25 +527,21 @@ $('exportBtn').addEventListener('click', () => {
     setTimeout(() => { $('exportBtn').textContent = 'Export my notes'; }, 1800);
     return;
   }
-  const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const lines = [['Startup', 'Booth', 'Visited', 'Interested', 'Note', 'Website', 'Category'].map(cell).join(',')];
-  for (const { s, m } of rows) {
-    lines.push([s.name, boothLabel(s.booths), m.visited ? 'yes' : '', m.interested ? 'yes' : '', m.note || '', s.website || '', s.category || ''].map(cell).join(','));
-  }
-  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'startup-nights-2026-my-booths.csv';
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  downloadCsv('startup-nights-2026-my-booths.csv', ['Startup', 'Booth', 'Visited', 'Interested', 'Note', 'Website', 'Category'],
+    rows.map(({ s, m }) => [s.name, boothLabel(s.booths), m.visited ? 'yes' : '', m.interested ? 'yes' : '', m.note || '', s.website || '', s.category || '']));
 });
 
-// ---------- sign-in for sync ----------
+// ---------- sign-in ----------
 
 const modal = $('authModal');
 let authEmail = '';
+let authReason = null;
+
+const REASONS = {
+  intro: 'Sign in with your email to mark booths you visit and keep private notes. Only you can see them, on any device.',
+  mark: 'Sign in to mark booths and keep notes. Your notes are private: only you can see them.',
+  booth: 'Sign in to keep private notes about the people who visit your booth.',
+};
 
 function authStep(step) {
   $('stepEmail').hidden = step !== 'email';
@@ -406,31 +549,47 @@ function authStep(step) {
   $('stepSignedIn').hidden = step !== 'done';
   $('authIntro').hidden = step === 'done';
   $('authBack').hidden = step !== 'code';
+  $('authBrowse').hidden = !(step === 'email' && authReason === 'intro');
+  $('authTitle').textContent = step === 'done' ? 'Your account' : authReason === 'intro' ? 'Startup Nights 2026 booth map' : 'Sign in';
   $('authSubmit').textContent = step === 'email' ? 'Send code' : step === 'code' ? 'Sign in' : 'Sign out';
   $('authSubmit').className = step === 'done' ? 'btn' : 'btn primary';
   $('authError').textContent = '';
   modal.dataset.step = step;
 }
 
+function openAuth(reason = 'mark') {
+  if (!store.backend) return;
+  authReason = reason;
+  $('authIntro').textContent = REASONS[reason] || REASONS.mark;
+  if (store.user) {
+    $('authWho').textContent = store.user.email;
+    const own = byId.get(ownStartup());
+    $('authOwnBooth').textContent = own ? `Your booth: ${own.name} (${boothLabel(own.booths)}).` : '';
+    authStep('done');
+  } else authStep('email');
+  if (!modal.open) modal.showModal();
+  setTimeout(() => (store.user ? $('authSubmit') : $('authEmail')).focus(), 30);
+}
+
+function closeAuth() {
+  if (authReason === 'intro') storageSet(BROWSE_KEY, '1');
+  if (modal.open) modal.close();
+}
+
 function renderAccount() {
   const u = store.user;
   $('accountBtn').hidden = !store.backend;
-  $('accountBtn').innerHTML = u
-    ? esc(u.email)
-    : '<span class="btn-long">Sync across devices</span><span class="btn-short">Sync</span>';
-  $('accountBtn').title = u ? 'Signed in: your marks sync across devices' : 'Sign in with your email to sync your marks';
-  $('footSync').textContent = u ? ' and synced to your account' : '';
+  document.body.classList.toggle('no-backend', !store.backend);
+  $('accountBtn').textContent = u ? u.email : 'Sign in';
+  $('accountBtn').title = u ? 'Your account' : 'Sign in to mark booths and keep private notes';
+  $('footNote').textContent = u ? 'Private to your account' : store.backend ? 'Sign in to save marks and notes' : 'Saved on this device';
+  refreshProgress();
 }
 
-$('accountBtn').addEventListener('click', () => {
-  if (store.user) {
-    $('authWho').textContent = store.user.email;
-    authStep('done');
-  } else authStep('email');
-  modal.showModal();
-  setTimeout(() => (store.user ? $('authSubmit') : $('authEmail')).focus(), 30);
-});
-$('authClose').addEventListener('click', () => modal.close());
+$('accountBtn').addEventListener('click', () => openAuth(store.user ? 'account' : 'mark'));
+$('authClose').addEventListener('click', closeAuth);
+$('authBrowse').addEventListener('click', closeAuth);
+modal.addEventListener('cancel', () => { if (authReason === 'intro') storageSet(BROWSE_KEY, '1'); });
 $('authBack').addEventListener('click', () => { authStep('email'); $('authEmail').focus(); });
 
 $('authForm').addEventListener('submit', async (e) => {
@@ -451,13 +610,19 @@ $('authForm').addEventListener('submit', async (e) => {
     } else if (step === 'code') {
       const code = $('authCode').value.replace(/\D/g, '');
       if (code.length < 4) throw new Error('Enter the code from the email.');
+      let me;
       try {
-        await store.verifyCode(authEmail, code);
+        me = await store.verifyCode(authEmail, code);
       } catch (err) {
         if (err.status === 401) throw new Error('That code did not work. Check the email or request a new one.');
         throw err;
       }
+      storageSet(BROWSE_KEY, '1');
       modal.close();
+      if (!me.welcomed) {
+        showWelcome();
+        store.updateProfile({ welcomed: true });
+      }
     } else {
       await store.signOut();
       modal.close();
@@ -469,10 +634,15 @@ $('authForm').addEventListener('submit', async (e) => {
   }
 });
 
-store.addEventListener('auth', renderAccount);
+store.addEventListener('auth', (e) => {
+  renderAccount();
+  renderList();
+  if (ui.selected) renderDetail();
+  if (e.detail?.expired) openAuth('mark');
+});
 store.addEventListener('sync', (e) => {
   const el = $('syncStatus');
-  const map = { syncing: ['Syncing…', 'busy'], synced: ['Synced', 'ok'], error: ['Sync paused, retrying', 'err'], offline: ['Offline: saved on device', 'err'] };
+  const map = { syncing: ['Saving…', 'busy'], synced: ['Saved', 'ok'], error: ['Offline, will retry', 'err'], offline: ['Offline', 'err'] };
   const v = map[e.detail.state];
   el.hidden = !v;
   if (v) { el.textContent = v[0]; el.className = `sync ${v[1]}`; }
@@ -481,15 +651,13 @@ store.addEventListener('sync', (e) => {
 // ---------- touch gesture hint (once per device) ----------
 
 if (window.matchMedia('(pointer: coarse)').matches && $('gestureHint')) {
-  let seen = false;
-  try { seen = localStorage.getItem('sn26.hint') === '1'; } catch { /* storage blocked */ }
-  if (!seen) {
+  if (storageGet('sn26.hint') !== '1') {
     const hint = $('gestureHint');
     hint.hidden = false;
     const dismiss = () => {
       hint.classList.add('gone');
       setTimeout(() => hint.remove(), 450);
-      try { localStorage.setItem('sn26.hint', '1'); } catch { /* storage blocked */ }
+      storageSet('sn26.hint', '1');
     };
     $('map').addEventListener('pointerdown', dismiss, { once: true });
     setTimeout(dismiss, 7000);
@@ -499,7 +667,6 @@ if (window.matchMedia('(pointer: coarse)').matches && $('gestureHint')) {
 // ---------- start ----------
 
 refreshBooths();
-refreshProgress();
 renderList();
 renderAccount();
 requestAnimationFrame(() => {
@@ -514,4 +681,7 @@ if (fromHash) {
   if (s) select(s.id, { fly: true, scroll: true });
 }
 
-store.init().then(renderAccount);
+await store.init();
+renderAccount();
+// First visit without an account: offer sign-in once, with the option to just browse.
+if (store.backend && !store.signedIn && storageGet(BROWSE_KEY) !== '1') openAuth('intro');
