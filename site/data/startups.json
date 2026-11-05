@@ -1,0 +1,2354 @@
+[
+ {
+  "id": "a-baggenstos",
+  "name": "A. Baggenstos",
+  "booths": [
+   "203"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "IT services company in Wallisellen near Zurich, founded in 1925, providing cloud, hybrid and on-premise infrastructure, managed services, outsourcing and Microsoft solutions for Swiss businesses.",
+  "website": "https://www.baggenstos.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "accelarium",
+  "name": "Accelarium",
+  "booths": [
+   "038"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "aequitec-ag",
+  "name": "Aequitec AG",
+  "booths": [
+   "162"
+  ],
+  "status": "verified",
+  "category": "Fintech",
+  "description": "Zurich-based platform for digital share registers and shareholder meetings, handling voting, proxies, share transfers and capital increases for private and listed companies.",
+  "website": "https://www.aequitec.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "agenturscout",
+  "name": "AgenturScout",
+  "booths": [
+   "159"
+  ],
+  "status": "verified",
+  "category": "Marketing & Media",
+  "description": "Swiss platform that helps companies find and compare marketing, communication and web agencies through a curated, data-based matching process.",
+  "website": "https://www.agenturscout.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "algomia-gmbh",
+  "name": "Algomia GmbH",
+  "booths": [
+   "074"
+  ],
+  "status": "verified",
+  "category": "AI",
+  "description": "Aarau-based startup offering API-based optimisation AI that automates scheduling and resource allocation, such as crew scheduling for public transport operators, for B2B clients.",
+  "website": "https://www.venturelab.swiss/Algomia-The-Sword-Startup-Challenge-finalist-improving-crew-scheduling",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "alivion-ag",
+  "name": "Alivion AG",
+  "booths": [
+   "171"
+  ],
+  "status": "verified",
+  "category": "Health & Medtech",
+  "description": "ETH Zurich spin-off developing handheld gas sensors that detect volatile biomarkers in breath; its Nutrion device lets users monitor their metabolism.",
+  "website": "https://www.alivion.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "amanit-gmbh",
+  "name": "amanit GmbH",
+  "booths": [
+   "027"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "amesco-ag",
+  "name": "AMESCO AG",
+  "booths": [
+   "173"
+  ],
+  "status": "verified",
+  "category": "Food",
+  "description": "Swiss company in Kemptthal that has developed its own wine dealcoholisation method and develops, produces and markets alcohol-free wines with selected wineries.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "apex-lab",
+  "name": "Apex Lab",
+  "booths": [
+   "104"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "apropos",
+  "name": "Apropos",
+  "booths": [
+   "147"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "armasuisse",
+  "name": "armasuisse",
+  "booths": [
+   "077",
+   "078"
+  ],
+  "status": "verified",
+  "category": "Public Sector",
+  "description": "Swiss Federal Office for Defence Procurement within the DDPS; procures systems and equipment for the Swiss Armed Forces and runs defence science, technology and innovation programmes.",
+  "website": "https://www.ar.admin.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "astrivis-technologies-ag",
+  "name": "Astrivis Technologies AG",
+  "booths": [
+   "169"
+  ],
+  "status": "verified",
+  "category": "Software & SaaS",
+  "description": "ETH Zurich spin-off whose software turns smartphones and tablets into 3D scanners, focusing on mobile body scanning (e.g. feet, face) for healthcare, e-commerce and other industries.",
+  "website": "https://www.startup.ch/Astrivis",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "august-manser-ag",
+  "name": "August Manser AG",
+  "booths": [
+   "030"
+  ],
+  "status": "verified",
+  "category": "Robotics & Hardware",
+  "description": "Family-owned company in Altstätten (St. Gallen) with about 100 employees, developing and manufacturing mechanical and mechatronic systems for industrial customers.",
+  "website": "https://www.manser-ag.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "awakenomy",
+  "name": "Awakenomy",
+  "booths": [
+   "151"
+  ],
+  "status": "partial",
+  "category": "HR & Education",
+  "description": "Startup that pitched at the HR Festival in Zurich; no further verified details about its product found.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "aws",
+  "name": "AWS",
+  "booths": [
+   "103"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Amazon's cloud computing platform offering compute, storage, database and AI services; supports startups with credits and programmes such as AWS Activate.",
+  "website": "https://aws.amazon.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "axa",
+  "name": "AXA",
+  "booths": [
+   "039",
+   "040"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Swiss subsidiary of the AXA Group providing insurance and occupational pension solutions for private customers and companies.",
+  "website": "https://www.axa.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "beeaccounting",
+  "name": "beeaccounting",
+  "booths": [
+   "051"
+  ],
+  "status": "verified",
+  "category": "Legal & Services",
+  "description": "Fiduciary firm in Bassersdorf (Zurich), formerly ITS Treuhand AG, offering bookkeeping, tax advice, auditing and succession planning for companies.",
+  "website": "https://business-monitor.ch/de/companies/29530-beeaccounting-ag",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "bexio",
+  "name": "bexio",
+  "booths": [
+   "045",
+   "046",
+   "047"
+  ],
+  "status": "verified",
+  "category": "Software & SaaS",
+  "description": "Cloud business software for Swiss small businesses and self-employed people, covering accounting, invoicing, payroll and banking integration.",
+  "website": "https://www.bexio.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "beyond-bot-ai",
+  "name": "Beyond Bot AI",
+  "booths": [
+   "180"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "binabik-ag",
+  "name": "Binabik AG",
+  "booths": [
+   "213"
+  ],
+  "status": "verified",
+  "category": "AI",
+  "description": "Startup with offices in Winterthur and Turku building an agentic operating system for physical AI that lets humanoid and other robots learn tasks from small datasets.",
+  "website": "https://binabik.ai",
+  "websiteKind": "official"
+ },
+ {
+  "id": "borobotics-ag",
+  "name": "Borobotics AG",
+  "booths": [
+   "197"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "Winterthur startup building an autonomous electric drilling robot that drills shallow geothermal boreholes for heat pumps in tight urban spaces.",
+  "website": "https://www.borobotics.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "brack",
+  "name": "Brack",
+  "booths": [
+   "031"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Swiss online retailer selling electronics, household, office and leisure products to consumers and businesses; part of the Competec group in Mägenwil.",
+  "website": "https://www.brack.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "brian-study",
+  "name": "Brian Study",
+  "booths": [
+   "023"
+  ],
+  "status": "verified",
+  "category": "HR & Education",
+  "description": "Zurich-based HSG spin-off whose AI-powered learning app turns course material into adaptive, gamified quizzes and lessons for universities and schools.",
+  "website": "https://brian.study",
+  "websiteKind": "official"
+ },
+ {
+  "id": "captire",
+  "name": "CAPTIRE",
+  "booths": [
+   "004"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "casa-refill-ag",
+  "name": "Casa Refill AG",
+  "booths": [
+   "175"
+  ],
+  "status": "verified",
+  "category": "Consumer",
+  "description": "Zurich refill store selling shampoo, conditioner, body lotion and other care products without plastic packaging; customers refill their own containers.",
+  "website": "https://sihlcity.ch/de/stores/Casa-Refill/",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "cdds",
+  "name": "CDDS",
+  "booths": [
+   "080"
+  ],
+  "status": "verified",
+  "category": "Security",
+  "description": "Counter-Drone Defense Systems AG, a Schlieren (Zurich) startup developing low-collateral kinetic interceptors that neutralise hostile drones.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "cherrypeak",
+  "name": "CherryPeak",
+  "booths": [
+   "176"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "codenotch",
+  "name": "Codenotch",
+  "booths": [
+   "108"
+  ],
+  "status": "verified",
+  "category": "HR & Education",
+  "description": "Coding school based in Madrid offering full-time and part-time bootcamps in web and mobile development and data science, in person and online, for career changers.",
+  "website": "https://www.coursereport.com/schools/codenotch",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "conda",
+  "name": "Conda",
+  "booths": [
+   "037"
+  ],
+  "status": "verified",
+  "category": "Fintech",
+  "description": "Swiss crowdinvesting platform based in Baar that lets private investors invest in startups and SMEs from CHF 100 per campaign; also offers white-label platforms.",
+  "website": "https://www.conda.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "consultive",
+  "name": "Consultive",
+  "booths": [
+   "025"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "craftianai",
+  "name": "CraftianAI",
+  "booths": [
+   "161"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "cvcoach",
+  "name": "CVCoach",
+  "booths": [
+   "061"
+  ],
+  "status": "partial",
+  "category": "HR & Education",
+  "description": "Young startup (CVCoach GmbH, Münsingen BE, registered 2026) helping job seekers write and improve their CVs for job applications. Product details not verified.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "d-agency",
+  "name": "D-Agency",
+  "booths": [
+   "165"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "d-enstag-technology-ag",
+  "name": "D!ENSTAG Technology AG",
+  "booths": [
+   "101"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "databiomix",
+  "name": "DATABIOMIX",
+  "booths": [
+   "054"
+  ],
+  "status": "verified",
+  "category": "Biotech",
+  "description": "Schlieren-based techbio startup offering gut microbiota analysis, microbial genomics and strain-specific primer design, and developing AI-based microbiome biomarkers and companion diagnostics for researchers, clinicians and biopharma.",
+  "website": "https://databiomix.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "datahive",
+  "name": "DataHive",
+  "booths": [
+   "042"
+  ],
+  "status": "partial",
+  "category": "AI",
+  "description": "Possibly DataHive AI, a platform where people contribute and get paid for their personal data used to train AI models; match with the exhibitor not confirmed.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "digital-airways-gmbh",
+  "name": "Digital Airways GmbH",
+  "booths": [
+   "007"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "dindin",
+  "name": "DinDin",
+  "booths": [
+   "146"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "diprima",
+  "name": "DiPriMa",
+  "booths": [
+   "182"
+  ],
+  "status": "partial",
+  "category": "Software & SaaS",
+  "description": "Geneva-based startup selected in 2025 for support from the Fongit cantonal innovation fund; product details not verified.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "do-it-in-st-gallen",
+  "name": "Do it in St.Gallen",
+  "booths": [
+   "102"
+  ],
+  "status": "partial",
+  "category": "Public Sector",
+  "description": "Initiative promoting St.Gallen as a place to found and grow a business; no official page could be verified online.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "dphi-space-ag",
+  "name": "Dphi Space AG",
+  "booths": [
+   "076"
+  ],
+  "status": "verified",
+  "category": "Space",
+  "description": "Lausanne startup that builds and operates shared satellites (Clustergate) hosting multiple customer payloads and offering in-orbit computing, giving companies cheaper and faster access to space.",
+  "website": "https://www.dphispace.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "e-residency-republic-of-estonia",
+  "name": "e-Residency – Republic of Estonia",
+  "booths": [
+   "218"
+  ],
+  "status": "verified",
+  "category": "Public Sector",
+  "description": "Estonian government programme giving non-residents a government-issued digital identity to start and run an EU-based company online.",
+  "website": "https://www.e-resident.gov.ee",
+  "websiteKind": "official"
+ },
+ {
+  "id": "eblum",
+  "name": "Eblum",
+  "booths": [
+   "119"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "edenct",
+  "name": "EdenCT",
+  "booths": [
+   "152"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "elix-nutraceutical",
+  "name": "ELIX Nutraceutical",
+  "booths": [
+   "052"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "em-path-gmbh",
+  "name": "EM Path GmbH",
+  "booths": [
+   "075"
+  ],
+  "status": "verified",
+  "category": "Robotics & Hardware",
+  "description": "Lausanne-area hardware and software startup whose wave-imaging RF test system characterises antennas and complete wireless devices in under a second, without a traditional anechoic chamber.",
+  "website": "https://empath.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "erfolgs-gemeinschaft",
+  "name": "Erfolgs Gemeinschaft",
+  "booths": [
+   "139"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "esa-bic-switzerland",
+  "name": "ESA BIC Switzerland",
+  "booths": [
+   "120"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "European Space Agency business incubation centre run with ETH Zurich, giving Swiss startups with a space connection seed funding, coaching and access to ESA expertise and facilities.",
+  "website": "https://www.esabic.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "eternal-echo-ag",
+  "name": "Eternal Echo AG",
+  "booths": [
+   "183"
+  ],
+  "status": "partial",
+  "category": "Marketing & Media",
+  "description": "Horgen (ZH) company whose registered purpose covers trade, consulting and coaching, video and film production, and data tracking services; product not verified.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "euresearch",
+  "name": "Euresearch",
+  "booths": [
+   "016",
+   "017"
+  ],
+  "status": "verified",
+  "category": "Education & Research",
+  "description": "Swiss information network funded by SERI that advises researchers and companies, free of charge, on finding partners and applying for EU research and innovation funding such as Horizon Europe.",
+  "website": "https://www.euresearch.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "evoria-gmbh",
+  "name": "Evoria GmbH",
+  "booths": [
+   "086"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "findea",
+  "name": "Findea",
+  "booths": [
+   "033"
+  ],
+  "status": "verified",
+  "category": "Legal & Services",
+  "description": "Winterthur-based digital fiduciary providing bookkeeping, tax and payroll services through an online platform for startups and SMEs across Switzerland.",
+  "website": "https://www.findea.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "finixr",
+  "name": "Finixr",
+  "booths": [
+   "129"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "fluidbot-ag",
+  "name": "fluidbot AG",
+  "booths": [
+   "185"
+  ],
+  "status": "verified",
+  "category": "Robotics & Hardware",
+  "description": "Gossau (SG) startup building autonomous robots that travel through drinking water pipes and collect condition data, helping water utilities detect damage and leaks early.",
+  "website": "https://www.fluidbot.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "fortcontrol-by-fortit",
+  "name": "fortControl by FortIT",
+  "booths": [
+   "098"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "fotny",
+  "name": "Fotny",
+  "booths": [
+   "019"
+  ],
+  "status": "verified",
+  "category": "AI",
+  "description": "Event photo app: hosts collect guest and photographer photos in one place, AI filters inappropriate content, and each guest finds their own photos by uploading a selfie.",
+  "website": "https://www.producthunt.com/products/fotny",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "fruitbeam-gmbh",
+  "name": "Fruitbeam GmbH",
+  "booths": [
+   "132"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "geen-health-is-your-choice",
+  "name": "Geen - Health is your choice",
+  "booths": [
+   "220"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "genesys-bio-s-r-l",
+  "name": "GeneSys Bio s.r.l.",
+  "booths": [
+   "190"
+  ],
+  "status": "verified",
+  "category": "Health & Medtech",
+  "description": "Italian diagnostics startup (Viterbo area) developing a portable AI-based system that detects pathogens and antimicrobial resistance in under 30 minutes.",
+  "website": "https://mtec-sc.org/life-sciences/genesys-bio",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "genogra-s-r-l",
+  "name": "GenoGra s.r.l.",
+  "booths": [
+   "191"
+  ],
+  "status": "verified",
+  "category": "Biotech",
+  "description": "Milan-based Politecnico di Milano spin-off offering genome-graph (pangenomics) analysis software for human, plant, animal and microbial genomics, cutting analysis time from weeks to days.",
+  "website": "https://www.terrapinn.com/conference/biotechx/exhibitor-genogra-srl.stm",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "gisada",
+  "name": "Gisada",
+  "booths": [
+   "100"
+  ],
+  "status": "verified",
+  "category": "Consumer",
+  "description": "Winterthur-based fragrance brand founded in 2013 that creates, produces and distributes perfumes sold in retail stores in over 90 countries.",
+  "website": "https://en.wikipedia.org/wiki/Gisada",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "happy-pot-gmbh",
+  "name": "Happy Pot GmbH",
+  "booths": [
+   "145"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "helvic",
+  "name": "Helvic",
+  "booths": [
+   "069"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "helvo",
+  "name": "Helvo",
+  "booths": [
+   "097"
+  ],
+  "status": "verified",
+  "category": "Fintech",
+  "description": "Financial platform for Swiss SMEs and founders that combines business accounts, payments, invoicing, payroll and accounting; accounts are held with partner bank Hypothekarbank Lenzburg.",
+  "website": "https://f4.fund/startups/helvo",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "heyclarus-ag",
+  "name": "HeyClarus AG",
+  "booths": [
+   "041"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "hisy-technologies-srl",
+  "name": "Hisy Technologies srl",
+  "booths": [
+   "222"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "home-of-innovation",
+  "name": "Home of Innovation",
+  "booths": [
+   "140"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Coworking space and startup hub of about 6,000 m2 on the former Rieter industrial site in Winterthur, offering office space, community events and support programmes for startups.",
+  "website": "https://homeofinnovation.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "hooq-ag",
+  "name": "HOOQ AG",
+  "booths": [
+   "143"
+  ],
+  "status": "verified",
+  "category": "Consumer",
+  "description": "Winterthur startup making custom climbing shoes built from 3D scans of each customer's feet, with semi-custom and full-custom models.",
+  "website": "https://www.hooq.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "hwz",
+  "name": "HWZ",
+  "booths": [
+   "117"
+  ],
+  "status": "verified",
+  "category": "Education & Research",
+  "description": "HWZ Hochschule für Wirtschaft Zürich, a university of applied sciences offering part-time bachelor, master and continuing education programmes in business, communication, digital business and entrepreneurship.",
+  "website": "https://fh-hwz.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "hype-swiss",
+  "name": "hype SWISS",
+  "booths": [
+   "009"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "icarus",
+  "name": "Icarus",
+  "booths": [
+   "189"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "impact-hub-zurich",
+  "name": "Impact Hub Zürich",
+  "booths": [
+   "020"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Zurich branch of the global Impact Hub network, running coworking spaces, events and programmes for entrepreneurs and startups working on social and environmental impact.",
+  "website": "https://zurich.impacthub.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "infercom",
+  "name": "INFERCOM",
+  "booths": [
+   "179"
+  ],
+  "status": "verified",
+  "category": "AI",
+  "description": "Luxembourg-based provider of sovereign AI inference-as-a-service for European companies and public agencies, running open-weight models on SambaNova hardware in German data centres via an OpenAI-compatible API.",
+  "website": "https://infercom.ai",
+  "websiteKind": "official"
+ },
+ {
+  "id": "innosuisse",
+  "name": "Innosuisse",
+  "booths": [
+   "110"
+  ],
+  "status": "verified",
+  "category": "Public Sector",
+  "description": "Swiss Innovation Agency, the federal body that funds science-based innovation projects and supports startups through coaching, certification and training programmes.",
+  "website": "https://www.innosuisse.admin.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "innoverse-technologies-gmbh",
+  "name": "Innoverse Technologies GmbH",
+  "booths": [
+   "156"
+  ],
+  "status": "partial",
+  "category": "AI",
+  "description": "Possible match: innoverse.AI, an AI company in Villars-sur-Glâne developing artificial intelligence solutions for organisations; link to the GmbH not confirmed.",
+  "website": "https://www.innoverse.ai",
+  "websiteKind": "official"
+ },
+ {
+  "id": "ironate",
+  "name": "Ironate",
+  "booths": [
+   "034"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "italian-trade-agency",
+  "name": "Italian Trade Agency",
+  "booths": [
+   "187"
+  ],
+  "status": "verified",
+  "category": "Public Sector",
+  "description": "ITA (ICE), the Italian government agency that promotes Italian companies abroad and attracts foreign investment to Italy, including startup delegations at international events.",
+  "website": "https://www.ice.it/en",
+  "websiteKind": "official"
+ },
+ {
+  "id": "jobify-gmbh-neqt-app",
+  "name": "Jobify GmbH (Neqt App)",
+  "booths": [
+   "096"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "kanton-zurich",
+  "name": "Kanton Zürich",
+  "booths": [
+   "224"
+  ],
+  "status": "verified",
+  "category": "Public Sector",
+  "description": "Cantonal government of Zurich; its Office for Economy supports companies and startups setting up and growing in the canton.",
+  "website": "https://www.zh.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "kikidj-com",
+  "name": "KikiDj.com",
+  "booths": [
+   "084"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "klarino",
+  "name": "Klarino",
+  "booths": [
+   "163"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "kuafu",
+  "name": "Kuafu",
+  "booths": [
+   "121"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "Dübendorf startup founded in 2024 commercialising Empa research: AI-based software that helps grid operators ease congestion by using flexible loads such as e-mobility and smart buildings.",
+  "website": "https://bouncewatch.com/company/kuafu-1",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "langrove",
+  "name": "Langrove",
+  "booths": [
+   "082"
+  ],
+  "status": "verified",
+  "category": "Software & SaaS",
+  "description": "Platform for building app backends: data models, endpoint code, authorization policies, workflows and AI agents.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "launch-control",
+  "name": "Launch Control",
+  "booths": [
+   "142"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "lemons-in-the-room",
+  "name": "Lemons in the Room",
+  "booths": [
+   "188"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "lexr",
+  "name": "LEXR",
+  "booths": [
+   "071"
+  ],
+  "status": "verified",
+  "category": "Legal & Services",
+  "description": "Law firm founded in Zurich that advises startups, scale-ups and tech companies on corporate, financing, commercial, IP, data protection and employment matters.",
+  "website": "https://www.lexr.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "liquid",
+  "name": "Liquid",
+  "booths": [
+   "155"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "maven-health",
+  "name": "Maven Health",
+  "booths": [
+   "053"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "medsaver-gmbh",
+  "name": "MEDSAVER GmbH",
+  "booths": [
+   "109"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "meetstar",
+  "name": "Meetstar",
+  "booths": [
+   "201"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "melon-automation-gmbh",
+  "name": "Melon Automation GmbH",
+  "booths": [
+   "154"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "microsoft",
+  "name": "Microsoft",
+  "booths": [
+   "194",
+   "195",
+   "214",
+   "215"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Global technology company providing cloud services (Azure), productivity software (Microsoft 365), AI tools (Copilot) and the Microsoft for Startups programme.",
+  "website": "https://www.microsoft.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "mll",
+  "name": "MLL",
+  "booths": [
+   "126"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "mme-legal",
+  "name": "MME Legal",
+  "booths": [
+   "202"
+  ],
+  "status": "verified",
+  "category": "Legal & Services",
+  "description": "Swiss business law firm in Zurich and Zug combining legal, tax and compliance advice, with strong practices in fintech, blockchain and digital assets, technology, data protection and M&A.",
+  "website": "https://www.mme.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "monitoris-ag",
+  "name": "Monitoris AG",
+  "booths": [
+   "081"
+  ],
+  "status": "verified",
+  "category": "Fintech",
+  "description": "Zurich-based digital fiduciary offering an AI-supported back office for self-employed people and SMEs: bookkeeping, VAT, payroll, tax returns and annual accounts, with personal accountant support.",
+  "website": "https://www.monitoris.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "nettle-circle-ag",
+  "name": "Nettle Circle AG",
+  "booths": [
+   "022"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "Lucerne-based startup producing HILAYA, a traceable natural fibre from Himalayan nettle, as a lower-water alternative to cotton and synthetics for spinners and nonwoven producers.",
+  "website": "https://www.nettlecircle.com/",
+  "websiteKind": "official"
+ },
+ {
+  "id": "nexell",
+  "name": "Nexell",
+  "booths": [
+   "149"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "next-business",
+  "name": "Next Business",
+  "booths": [
+   "114"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "niehoff-food-gmbh",
+  "name": "Niehoff Food GmbH",
+  "booths": [
+   "174"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "nordfen",
+  "name": "Nordfen",
+  "booths": [
+   "122"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "nrgy-one-ag",
+  "name": "NRGY One AG",
+  "booths": [
+   "010"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "Aarberg (BE) company, formed in 2026 from Siima Solution GmbH, that develops and operates energy-related software, systems and devices and trades energy products and services.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "obrist-helps",
+  "name": "Obrist Helps",
+  "booths": [
+   "107"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "oceans-psychometrics",
+  "name": "Oceans Psychometrics",
+  "booths": [
+   "091"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "okidooki-ag",
+  "name": "Okidooki AG",
+  "booths": [
+   "123"
+  ],
+  "status": "verified",
+  "category": "Software & SaaS",
+  "description": "Basel-based company building and operating digital platforms and apps, focused on crypto, blockchain, AI and visual technologies.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "oomnium-ag",
+  "name": "OOMNIUM AG",
+  "booths": [
+   "055",
+   "056",
+   "057"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Zurich-based crowd-investing platform that lets private investors invest directly in Swiss startups and SMEs, and supports companies running private or open funding rounds.",
+  "website": "https://oomnium.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "opinstar-organicer-gmbh",
+  "name": "OPINSTAR (ORGANICER GMBH)",
+  "booths": [
+   "008"
+  ],
+  "status": "verified",
+  "category": "Marketing & Media",
+  "description": "Review-management service helping businesses collect more Google reviews, improve visibility in Google and AI search, and answer reviews with automated AI responses.",
+  "website": "https://opinstar.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "optimal-energy",
+  "name": "Optimal Energy",
+  "booths": [
+   "157"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "orbitype",
+  "name": "Orbitype",
+  "booths": [
+   "035"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "parkex-gmbh",
+  "name": "Parkex GmbH",
+  "booths": [
+   "006"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "payrollplus-ag",
+  "name": "PayrollPlus AG",
+  "booths": [
+   "136"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "philip-morris",
+  "name": "Philip Morris",
+  "booths": [
+   "153"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Philip Morris International, a multinational tobacco company with major Swiss operations in Lausanne and Neuchatel, developing smoke-free products such as heated tobacco and nicotine pouches.",
+  "website": "https://www.pmi.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "phylax-intelligence",
+  "name": "Phylax Intelligence",
+  "booths": [
+   "128"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "pixelgipfel-ag",
+  "name": "Pixelgipfel AG",
+  "booths": [
+   "172"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "planetary",
+  "name": "planetary",
+  "booths": [
+   "058"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "polyview-ag",
+  "name": "PolyView AG",
+  "booths": [
+   "127"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "prana-lab",
+  "name": "Prana Lab",
+  "booths": [
+   "192"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "probst-partner",
+  "name": "Probst Partner",
+  "booths": [
+   "099"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "publy-ch",
+  "name": "publy.ch",
+  "booths": [
+   "002"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "qambria",
+  "name": "Qambria",
+  "booths": [
+   "024"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "quantum-vibrations",
+  "name": "Quantum Vibrations",
+  "booths": [
+   "166"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "quitt-business",
+  "name": "quitt Business",
+  "booths": [
+   "112"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "quitty-ag",
+  "name": "Quitty AG",
+  "booths": [
+   "018"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "rednea-ch",
+  "name": "rednea.ch",
+  "booths": [
+   "150"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "rematter",
+  "name": "Rematter",
+  "booths": [
+   "021"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "rezid-gmbh",
+  "name": "Rezid GmbH",
+  "booths": [
+   "164"
+  ],
+  "status": "verified",
+  "category": "Software & SaaS",
+  "description": "Rapperswil SG company developing a digital platform for social networking and collaboration, with software for individuals, companies and organisations covering communication, project management and data protection.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "rilemo",
+  "name": "Rilemo",
+  "booths": [
+   "219"
+  ],
+  "status": "verified",
+  "category": "Health & Medtech",
+  "description": "Italian medtech startup developing a portable, non-ionising electromagnetic imaging device for rapid bedside detection of stroke, brain bleeding and other fluid-related conditions in emergency and neurological care.",
+  "website": "https://www.i3p.it/en/startup/rilemo",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "room4u",
+  "name": "Room4U",
+  "booths": [
+   "012"
+  ],
+  "status": "verified",
+  "category": "PropTech",
+  "description": "Room4U AG in Elsau near Winterthur rents out storage rooms, private offices, coworking desks and virtual offices on flexible terms, including ready-to-use space for founders.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "ruag",
+  "name": "RUAG",
+  "booths": [
+   "072",
+   "073"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Swiss state-owned defence and aerospace technology company that maintains, repairs and upgrades military systems as technology partner of the Swiss Armed Forces.",
+  "website": "https://www.ruag.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "s-qube-technologies-gmbh",
+  "name": "S-Qube Technologies GmbH",
+  "booths": [
+   "160"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "sag-tour",
+  "name": "SAG TOUR",
+  "booths": [
+   "216"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "schulz-media",
+  "name": "Schulz Media",
+  "booths": [
+   "095"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "sebra",
+  "name": "SÉBRA",
+  "booths": [
+   "167"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "sedax",
+  "name": "Sedax",
+  "booths": [
+   "028",
+   "029"
+  ],
+  "status": "verified",
+  "category": "Robotics & Hardware",
+  "description": "Engineering firm in Uster that develops, manufactures and assembles mechanical and mechatronic systems and custom automation solutions, together with sister company August Manser AG.",
+  "website": "https://sedax.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "sencare",
+  "name": "Sencare",
+  "booths": [
+   "221"
+  ],
+  "status": "partial",
+  "category": "Health & Medtech",
+  "description": "Milan-based healthtech startup with a cloud platform that helps care cooperatives, pharmacies and healthcare organisations organise and manage home-care services; reportedly also active in Switzerland.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "sentianova",
+  "name": "SentiaNova",
+  "booths": [
+   "060"
+  ],
+  "status": "verified",
+  "category": "Food",
+  "description": "Zurich foodtech startup with a patented pre-processing step that removes bitter, beany off-flavours from pea and other pulse proteins, licensed to existing protein manufacturers.",
+  "website": "https://www.crunchbase.com/organization/sentianova",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "sequre-ag",
+  "name": "SeQure AG",
+  "booths": [
+   "184"
+  ],
+  "status": "partial",
+  "category": "Security",
+  "description": "IT services company based in Baar (Zug), incorporated in 2025; no product details found.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "shine4star",
+  "name": "Shine4Star",
+  "booths": [
+   "087"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "sictic",
+  "name": "SICTIC",
+  "booths": [
+   "115"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Zurich-based non-profit angel investor club (Swiss ICT Investor Club) connecting early-stage Swiss tech startups with business angels and investors for pre-seed and seed financing rounds.",
+  "website": "https://sictic.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "snack-that-gmbh",
+  "name": "Snack That GmbH",
+  "booths": [
+   "116"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "snowventum-ag",
+  "name": "SnowVentum AG",
+  "booths": [
+   "177"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "sobi",
+  "name": "SOBi",
+  "booths": [
+   "036"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "softbees",
+  "name": "SoftBees",
+  "booths": [
+   "026"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "soha-treuhand",
+  "name": "SoHa Treuhand",
+  "booths": [
+   "113"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "solcept",
+  "name": "Solcept",
+  "booths": [
+   "168"
+  ],
+  "status": "verified",
+  "category": "Robotics & Hardware",
+  "description": "Swiss engineering company developing embedded electronics and software for industrial, medical and other customers.",
+  "website": "https://www.solcept.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "solinea-gmbh",
+  "name": "Solinea GmbH",
+  "booths": [
+   "111",
+   "131"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "steasy-nexenic-ag",
+  "name": "Steasy (Nexenic AG)",
+  "booths": [
+   "196"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "subatron-gmbh",
+  "name": "Subatron GmbH",
+  "booths": [
+   "181"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "swisper",
+  "name": "Swisper",
+  "booths": [
+   "094"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "swiss-food-nutrition-valley",
+  "name": "Swiss Food & Nutrition Valley",
+  "booths": [
+   "059"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Swiss non-profit association that connects startups, corporates, universities, investors and public bodies to foster innovation in food, nutrition and agriculture.",
+  "website": "https://www.swissfoodnutritionvalley.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "swiss-life",
+  "name": "Swiss Life",
+  "booths": [
+   "133"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Swiss life insurance and pensions group offering life insurance, retirement planning, pension solutions and asset management to private and corporate clients.",
+  "website": "https://www.swisslife.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "swiss-open-solutions",
+  "name": "Swiss Open Solutions",
+  "booths": [
+   "148"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "swiss-startup-association-ssa",
+  "name": "Swiss Startup Association (SSA)",
+  "booths": [
+   "118"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Non-profit association that represents the interests of Swiss startups and founders in politics and public debate and offers networking and services to its members.",
+  "website": "https://www.swissstartupassociation.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "swiss21-org-ag",
+  "name": "Swiss21.org AG",
+  "booths": [
+   "049",
+   "050",
+   "062",
+   "063"
+  ],
+  "status": "verified",
+  "category": "Software & SaaS",
+  "description": "Swiss provider of free cloud business software for SMEs and startups, covering accounting, invoicing and related administration.",
+  "website": "https://www.swiss21.org",
+  "websiteKind": "official"
+ },
+ {
+  "id": "swizz-ai",
+  "name": "SWIZZ.AI",
+  "booths": [
+   "003"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "swozi-ag",
+  "name": "Swozi AG",
+  "booths": [
+   "013"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "tailored-intelligence-gmbh",
+  "name": "Tailored Intelligence GmbH",
+  "booths": [
+   "005"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "talent-kick",
+  "name": "Talent Kick",
+  "booths": [
+   "193"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Free cross-university entrepreneurship programme run by the Kick Foundation that helps students at Swiss universities find co-founders, get mentoring and training, and build a startup while studying.",
+  "website": "https://www.talentkick.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "taler-operations-ag",
+  "name": "Taler Operations AG",
+  "booths": [
+   "158"
+  ],
+  "status": "verified",
+  "category": "Fintech",
+  "description": "Biel-based company that operates the GNU Taler privacy-preserving digital payment system in Swiss francs for individuals and businesses in Switzerland.",
+  "website": "https://taler-ops.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "td-synnex",
+  "name": "TD Synnex",
+  "booths": [
+   "130"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Global IT distributor and solutions aggregator supplying hardware, software and cloud services to resellers, system integrators and service providers.",
+  "website": "https://www.tdsynnex.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "technopark-winterthur",
+  "name": "Technopark Winterthur",
+  "booths": [
+   "144"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Public-private technology centre in Winterthur offering office and lab space, coworking and startup support, including the Runway Incubator, alongside ZHAW research institutes and established firms.",
+  "website": "https://www.tpw.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "temya",
+  "name": "Temya",
+  "booths": [
+   "089"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "tethys-robotics",
+  "name": "Tethys Robotics",
+  "booths": [
+   "079"
+  ],
+  "status": "verified",
+  "category": "Robotics & Hardware",
+  "description": "ETH Zurich spin-off building compact autonomous underwater robots (Tethys ONE) for inspecting subsea infrastructure such as hydropower plants, cables and pipelines, and for search and recovery missions.",
+  "website": "https://tethys-robotics.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "thermaject-medical-devices-gmbh",
+  "name": "Thermaject Medical Devices GmbH",
+  "booths": [
+   "014"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "thermal-transformer",
+  "name": "Thermal Transformer",
+  "booths": [
+   "083"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "Develops heat-driven adsorption chillers that turn low-grade waste heat from data centres and industrial processes into cooling. Supported by Innosuisse, Klimastiftung Schweiz and Startfeld.",
+  "website": "https://thermaltransformer.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "trackable-aacho",
+  "name": "Trackable / Aacho",
+  "booths": [
+   "068"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "tri-bu",
+  "name": "Tri-bù",
+  "booths": [
+   "088"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "ubs",
+  "name": "UBS",
+  "booths": [
+   "134",
+   "135"
+  ],
+  "status": "verified",
+  "category": "Corporate",
+  "description": "Swiss-headquartered global bank and wealth manager offering wealth management, personal and corporate banking, asset management and investment banking.",
+  "website": "https://www.ubs.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "unbullet",
+  "name": "UnBullet",
+  "booths": [
+   "124"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "upwater-ag",
+  "name": "Upwater AG",
+  "booths": [
+   "015"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "Eawag spin-off from Dübendorf that monitors wastewater treatment plants: measuring greenhouse gas and oxygen emissions, optimising aeration energy use and analysing sludge microbiomes via DNA sequencing.",
+  "website": "https://upwater.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "vantyx",
+  "name": "Vantyx",
+  "booths": [
+   "170"
+  ],
+  "status": "partial",
+  "category": "Software & SaaS",
+  "description": "Possible match: pre-seed software company from Vimercate, Italy, building AI-based tools to digitise business processes. Link to the Startup Nights exhibitor not confirmed.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "venture",
+  "name": "Venture",
+  "booths": [
+   "093"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Swiss startup competition co-organised by ETH Zurich and McKinsey since 1997, giving early-stage founders cash prizes, consulting support and expert mentoring.",
+  "website": "https://www.venture.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "venture-robot-solutions",
+  "name": "Venture Robot Solutions",
+  "booths": [
+   "090"
+  ],
+  "status": "verified",
+  "category": "Robotics & Hardware",
+  "description": "Zurich-based robotics startup developing and validating socially aware service robots for healthcare and elderly care.",
+  "website": "https://venturerobotsolutions.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "vreni",
+  "name": "VRENI",
+  "booths": [
+   "085"
+  ],
+  "status": "verified",
+  "category": "Health & Medtech",
+  "description": "Zurich-developed voice companion for people with dementia that plays personal stories and familiar music at the press of a button, aimed at families and care institutions.",
+  "website": "https://wemakeit.com/projects/vreni-memories-in-a-tap",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "walder-wyss",
+  "name": "Walder Wyss",
+  "booths": [
+   "043",
+   "044"
+  ],
+  "status": "verified",
+  "category": "Legal & Services",
+  "description": "Swiss business law firm with offices in several Swiss cities, advising companies, startups and investors on corporate, M&A, financing, tax, IP and regulatory matters.",
+  "website": "https://www.walderwyss.com",
+  "websiteKind": "official"
+ },
+ {
+  "id": "wasteflow",
+  "name": "WasteFlow",
+  "booths": [
+   "067"
+  ],
+  "status": "verified",
+  "category": "AI",
+  "description": "EPFL spin-off from Lausanne providing AI vision systems for recycling and sorting facilities that identify and measure waste streams in real time to improve sorting efficiency.",
+  "website": "https://wasteflow.ai",
+  "websiteKind": "official"
+ },
+ {
+  "id": "wenger-vieli",
+  "name": "Wenger Vieli",
+  "booths": [
+   "137",
+   "138"
+  ],
+  "status": "verified",
+  "category": "Legal & Services",
+  "description": "Zurich business law firm founded in 1971, with an office in Zug, advising on corporate and M&A, banking and fintech, tax, IP, data protection and litigation.",
+  "website": "https://www.wengervieli.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "whatwatt-ag",
+  "name": "whatwatt AG",
+  "booths": [
+   "001"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "Swiss company making whatwatt Go, an adapter that reads household smart meters and delivers live electricity consumption and solar production data to apps and smart-home systems.",
+  "website": "https://whatwatt.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "winduction-ag",
+  "name": "Winduction AG",
+  "booths": [
+   "212"
+  ],
+  "status": "verified",
+  "category": "Mobility",
+  "description": "ETH Zurich spin-off developing wireless charging for electric buses, transferring power from plates in the road to receiver coils in the wheels so buses can recharge at stops.",
+  "website": "https://www.startup.ch/winduction",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "winti-ventures",
+  "name": "Winti Ventures",
+  "booths": [
+   "141"
+  ],
+  "status": "verified",
+  "category": "Investor & Ecosystem",
+  "description": "Winterthur-based investor club founded in 2022 that holds regular pitch events connecting early-stage startups with business angels and venture capitalists.",
+  "website": "https://pitchbook.com/profiles/investor/740210-05",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "writingant-by-ogren-digital",
+  "name": "WritingAnt by Ögren Digital",
+  "booths": [
+   "217"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "xlingua-ag",
+  "name": "XLINGUA AG",
+  "booths": [
+   "106"
+  ],
+  "status": "pending",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "yes",
+  "name": "YES",
+  "booths": [
+   "070"
+  ],
+  "status": "verified",
+  "category": "HR & Education",
+  "description": "Young Enterprise Switzerland, a non-profit running practical business education for Swiss school students, including the Company Programme in which students found and run their own mini-companies.",
+  "website": "https://www.yes.swiss",
+  "websiteKind": "official"
+ },
+ {
+  "id": "zelsius-ag",
+  "name": "Zelsius AG",
+  "booths": [
+   "092"
+  ],
+  "status": "verified",
+  "category": "Energy & Climate",
+  "description": "HSLU spin-off from Root (Lucerne) offering carbon-management software that helps Swiss industrial SMEs calculate corporate and product carbon footprints and prepare climate reports.",
+  "website": "https://netzerocompare.com/organizations/zelsius-ag",
+  "websiteKind": "profile"
+ },
+ {
+  "id": "zenplify-ag",
+  "name": "Zenplify AG",
+  "booths": [
+   "105"
+  ],
+  "status": "partial",
+  "category": "Software & SaaS",
+  "description": "Lausanne-registered company (Zenplify SA) whose registered purpose is software development and distribution, plus related training and consulting services. Product not verified.",
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "zhaw",
+  "name": "ZHAW",
+  "booths": [
+   "198",
+   "199",
+   "200",
+   "209",
+   "210",
+   "211"
+  ],
+  "status": "verified",
+  "category": "Education & Research",
+  "description": "Zurich University of Applied Sciences, headquartered in Winterthur, offering degree programmes, applied research and support for student and researcher startups.",
+  "website": "https://www.zhaw.ch",
+  "websiteKind": "official"
+ },
+ {
+  "id": "surprise-125",
+  "name": "Surprise Startup",
+  "booths": [
+   "125"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-178",
+  "name": "Surprise Startup",
+  "booths": [
+   "178"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-186",
+  "name": "Surprise Startup",
+  "booths": [
+   "186"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-204",
+  "name": "Surprise Startup",
+  "booths": [
+   "204"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-205",
+  "name": "Surprise Startup",
+  "booths": [
+   "205"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-206",
+  "name": "Surprise Startup",
+  "booths": [
+   "206"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-207",
+  "name": "Surprise Startup",
+  "booths": [
+   "207"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-208",
+  "name": "Surprise Startup",
+  "booths": [
+   "208"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ },
+ {
+  "id": "surprise-223",
+  "name": "Surprise Startup",
+  "booths": [
+   "223"
+  ],
+  "status": "surprise",
+  "category": null,
+  "description": null,
+  "website": null,
+  "websiteKind": null
+ }
+]

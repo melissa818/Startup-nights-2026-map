@@ -1,0 +1,46 @@
+{
+ "ruag": {
+  "website": "https://www.ruag.ch",
+  "confidence": "medium"
+ },
+ "swiss-life": {
+  "website": "https://www.swisslife.ch",
+  "confidence": "medium"
+ },
+ "solcept": {
+  "website": "https://www.solcept.ch",
+  "confidence": "medium"
+ },
+ "swiss-food-nutrition-valley": {
+  "website": "https://www.swissfoodnutritionvalley.com",
+  "confidence": "medium"
+ },
+ "swiss-startup-association-ssa": {
+  "website": "https://www.swissstartupassociation.ch",
+  "confidence": "medium"
+ },
+ "swiss21-org-ag": {
+  "website": "https://www.swiss21.org",
+  "confidence": "medium"
+ },
+ "philip-morris": {
+  "website": "https://www.pmi.com",
+  "confidence": "medium"
+ },
+ "langrove": {
+  "confidence": "medium"
+ },
+ "kikidj-com": {
+  "website": null,
+  "description": null
+ },
+ "innoverse-technologies-gmbh": {
+  "confidence": "low"
+ },
+ "hisy-technologies-srl": {
+  "description": null
+ },
+ "icarus": {
+  "description": null
+ }
+}

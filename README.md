@@ -1,0 +1,74 @@
+# Startup Nights 2026: interactive 3D booth map
+
+An interactive 3D version of the official Startup Nights 2026 venue map and booth list
+(`source/Venue_Map_with_Booth_List_SN26.pdf`).
+
+- **Find a startup two ways.** Pick a name in the scrollable list on the right and the camera flies to
+  its booth, or click a booth on the 3D floor plan to see who is there.
+- **Startup details.** Each selection shows a short description, category and a link to the startup's
+  website (from web research, see below).
+- **Track your visit.** Mark booths as *visited* (turns green) or *interested* (turns blue with a star),
+  and keep notes per startup. Filter the list by Starred, To visit, Visited or Notes, and export
+  everything as a CSV after the event.
+- **Works without an account.** Marks are saved on the device. Signing in with an email code
+  syncs them across phone and laptop through the Langrove backend.
+
+## Structure
+
+```
+site/                    static web app (no build step)
+  index.html
+  css/app.css
+  js/main.js             list, detail card, filters, sign-in, export
+  js/scene.js            three.js scene: hall, rooms, seats, booths, picking, camera
+  js/store.js            marks: localStorage + sync with the backend
+  data/venue.json        geometry extracted from the PDF (217 booths, walls, rooms, seats, exits)
+  data/startups.json     194 exhibitors with booths, description, website, category
+  vendor/three/          three.js r170 (MIT)
+backend/                 reference copy of the Langrove backend (models, policies, endpoints)
+data-src/                booth list, web research, manual overrides
+tools/extract_venue.py   PDF -> site/data/venue.json
+tools/build_startups.py  booth list + research -> site/data/startups.json
+source/                  the official PDF
+```
+
+## Run locally
+
+```bash
+cd site && python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+Locally there is no backend, so the sync button is hidden and marks stay on the device.
+
+## Rebuild the data
+
+```bash
+pip install pdfplumber
+python3 tools/extract_venue.py source/Venue_Map_with_Booth_List_SN26.pdf site/data/venue.json
+python3 tools/build_startups.py
+```
+
+To correct or add a startup's details, edit `data-src/overrides.json` (it wins over the research file)
+and rerun `build_startups.py`.
+
+## Exhibitor research status
+
+| status | count | shown as |
+|---|---|---|
+| verified | 86 | description + website link |
+| partial | 11 | what was found, marked "Details unverified", plus a web-search link |
+| pending | 88 | "could not verify yet" + web-search link |
+| surprise | 9 | Surprise Startup booths |
+
+Research was done with web search only (company sites could not be opened from the build
+environment), so links in the *verified* group come from search results. A few profile pages
+(startup.ch, Crunchbase, etc.) are used where no company site was found; the UI labels those
+"View profile". Booth 223 (a Surprise Startup) is in the booth list but not drawn on the official
+floor plan; the app says so.
+
+## Deploying
+
+The site is served by the Langrove project `startup-nights-2026` (see `backend/README.md`).
+Publish the `site/` folder with the connector's `upload_site`. Dev updates immediately; staging and
+production need a deploy from the Langrove console.

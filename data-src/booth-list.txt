@@ -1,0 +1,194 @@
+A. Baggenstos|203
+Accelarium|038
+Aequitec AG|162
+AgenturScout|159
+Algomia GmbH|074
+Alivion AG|171
+amanit GmbH|027
+AMESCO AG|173
+Apex Lab|104
+Apropos|147
+armasuisse|077,078
+Astrivis Technologies AG|169
+August Manser AG|030
+Awakenomy|151
+AWS|103
+AXA|039,040
+beeaccounting|051
+bexio|045,046,047
+Beyond Bot AI|180
+Binabik AG|213
+Borobotics AG|197
+Brack|031
+Brian Study|023
+CAPTIRE|004
+Casa Refill AG|175
+CDDS|080
+CherryPeak|176
+Codenotch|108
+Conda|037
+Consultive|025
+CraftianAI|161
+CVCoach|061
+D-Agency|165
+D!ENSTAG Technology AG|101
+DATABIOMIX|054
+DataHive|042
+Digital Airways GmbH|007
+DinDin|146
+DiPriMa|182
+Do it in St.Gallen|102
+Dphi Space AG|076
+e-Residency – Republic of Estonia|218
+Eblum|119
+EdenCT|152
+ELIX Nutraceutical|052
+EM Path GmbH|075
+Erfolgs Gemeinschaft|139
+ESA BIC Switzerland|120
+Eternal Echo AG|183
+Euresearch|016,017
+Evoria GmbH|086
+Findea|033
+Finixr|129
+fluidbot AG|185
+fortControl by FortIT|098
+Fotny|019
+Fruitbeam GmbH|132
+Geen - Health is your choice|220
+GeneSys Bio s.r.l.|190
+GenoGra s.r.l.|191
+Gisada|100
+Happy Pot GmbH|145
+Helvic|069
+Helvo|097
+HeyClarus AG|041
+Hisy Technologies srl|222
+Home of Innovation|140
+HOOQ AG|143
+HWZ|117
+hype SWISS|009
+Icarus|189
+Impact Hub Zürich|020
+INFERCOM|179
+Innosuisse|110
+Innoverse Technologies GmbH|156
+Ironate|034
+Italian Trade Agency|187
+Jobify GmbH (Neqt App)|096
+Kanton Zürich|224
+KikiDj.com|084
+Klarino|163
+Kuafu|121
+Langrove|082
+Launch Control|142
+Lemons in the Room|188
+LEXR|071
+Liquid|155
+Maven Health|053
+MEDSAVER GmbH|109
+Meetstar|201
+Melon Automation GmbH|154
+Microsoft|194,195,214,215
+MLL|126
+MME Legal|202
+Monitoris AG|081
+Nettle Circle AG|022
+Nexell|149
+Next Business|114
+Niehoff Food GmbH|174
+Nordfen|122
+NRGY One AG|010
+Obrist Helps|107
+Oceans Psychometrics|091
+Okidooki AG|123
+OOMNIUM AG|055,056,057
+OPINSTAR (ORGANICER GMBH)|008
+Optimal Energy|157
+Orbitype|035
+Parkex GmbH|006
+PayrollPlus AG|136
+Philip Morris|153
+Phylax Intelligence|128
+Pixelgipfel AG|172
+planetary|058
+PolyView AG|127
+Prana Lab|192
+Probst Partner|099
+publy.ch|002
+Qambria|024
+Quantum Vibrations|166
+quitt Business|112
+Quitty AG|018
+rednea.ch|150
+Rematter|021
+Rezid GmbH|164
+Rilemo|219
+Room4U|012
+RUAG|072,073
+S-Qube Technologies GmbH|160
+SAG TOUR|216
+Schulz Media|095
+SÉBRA|167
+Sedax|028,029
+Sencare|221
+SentiaNova|060
+SeQure AG|184
+Shine4Star|087
+SICTIC|115
+Snack That GmbH|116
+SnowVentum AG|177
+SOBi|036
+SoftBees|026
+SoHa Treuhand|113
+Solcept|168
+Solinea GmbH|111,131
+Steasy (Nexenic AG)|196
+Subatron GmbH|181
+Swisper|094
+Swiss Food & Nutrition Valley|059
+Swiss Life|133
+Swiss Open Solutions|148
+Swiss Startup Association (SSA)|118
+Swiss21.org AG|049,050,062,063
+SWIZZ.AI|003
+Swozi AG|013
+Tailored Intelligence GmbH|005
+Talent Kick|193
+Taler Operations AG|158
+TD Synnex|130
+Technopark Winterthur|144
+Temya|089
+Tethys Robotics|079
+Thermaject Medical Devices GmbH|014
+Thermal Transformer|083
+Trackable / Aacho|068
+Tri-bù|088
+UBS|134,135
+UnBullet|124
+Upwater AG|015
+Vantyx|170
+Venture|093
+Venture Robot Solutions|090
+VRENI|085
+Walder Wyss|043,044
+WasteFlow|067
+Wenger Vieli|137,138
+whatwatt AG|001
+Winduction AG|212
+Winti Ventures|141
+WritingAnt by Ögren Digital|217
+XLINGUA AG|106
+YES|070
+Zelsius AG|092
+Zenplify AG|105
+ZHAW|198,199,200,209,210,211
+Surprise Startup|125
+Surprise Startup|178
+Surprise Startup|186
+Surprise Startup|204
+Surprise Startup|205
+Surprise Startup|206
+Surprise Startup|207
+Surprise Startup|208
+Surprise Startup|223

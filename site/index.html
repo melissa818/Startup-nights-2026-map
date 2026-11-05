@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Startup Nights 2026 Booth Map</title>
+  <meta name="description" content="Interactive 3D floor plan of Startup Nights 2026: find every startup's booth, read what they do, mark booths you visited and keep notes.">
+  <meta name="theme-color" content="#1c1c1c">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c1c1c'/%3E%3Crect x='7' y='7' width='8' height='8' rx='2' fill='%23ffc800'/%3E%3Crect x='17' y='7' width='8' height='8' rx='2' fill='%232ebd6b'/%3E%3Crect x='7' y='17' width='8' height='8' rx='2' fill='%234c8dff'/%3E%3Crect x='17' y='17' width='8' height='8' rx='2' fill='%23ffc800'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.min.js",
+        "three/addons/controls/OrbitControls.js": "./vendor/three/OrbitControls.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <h1>Startup Nights 2026</h1>
+        <p>Interactive booth map</p>
+      </div>
+    </div>
+    <div class="progress" id="progress" aria-live="polite">
+      <div class="progress-text"><strong id="visitedCount">0</strong> of <span id="totalCount">0</span> visited · <span id="starCount">0</span> starred</div>
+      <div class="progress-bar" aria-hidden="true"><span id="progressFill"></span></div>
+    </div>
+    <div class="account">
+      <span class="sync" id="syncStatus" hidden></span>
+      <button class="btn ghost" id="accountBtn" type="button">Sync across devices</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="map-pane" aria-label="Floor plan">
+      <div class="map" id="map"></div>
+
+      <div class="map-tools" role="toolbar" aria-label="Map controls">
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" id="view3d" class="active" aria-pressed="true">3D</button>
+          <button type="button" id="view2d" aria-pressed="false">Top</button>
+        </div>
+        <button type="button" class="icon-btn" id="zoomIn" aria-label="Zoom in">+</button>
+        <button type="button" class="icon-btn" id="zoomOut" aria-label="Zoom out">−</button>
+        <button type="button" class="icon-btn" id="resetView" aria-label="Show the whole hall" title="Show the whole hall">
+          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="legend" aria-label="Legend">
+        <span><i style="--c: var(--booth)"></i>Booth</span>
+        <span><i style="--c: var(--visited)"></i>Visited</span>
+        <span><i style="--c: var(--star)"></i>Starred</span>
+        <span><i style="--c: var(--selected)"></i>Selected</span>
+      </div>
+
+      <div class="tooltip" id="tooltip" role="status" hidden></div>
+      <div class="name-tag" id="nameTag" hidden></div>
+
+      <article class="detail" id="detail" hidden aria-labelledby="detailName">
+        <button type="button" class="close" id="detailClose" aria-label="Close details">×</button>
+        <div class="detail-head">
+          <div class="chips" id="detailChips"></div>
+          <h2 id="detailName"></h2>
+        </div>
+        <p class="detail-desc" id="detailDesc"></p>
+        <div class="detail-links" id="detailLinks"></div>
+        <div class="detail-actions">
+          <button type="button" class="toggle visited" id="toggleVisited" aria-pressed="false">
+            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Mark visited</span>
+          </button>
+          <button type="button" class="toggle star" id="toggleStar" aria-pressed="false">
+            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 2.5l2.3 4.8 5.2.7-3.8 3.6.9 5.2L10 14.3l-4.6 2.5.9-5.2L2.5 8l5.2-.7z" fill="currentColor"/></svg>
+            <span>Interested</span>
+          </button>
+        </div>
+        <label class="notes-label" for="noteInput">My notes <span id="noteSaved" class="saved" aria-live="polite"></span></label>
+        <textarea id="noteInput" rows="3" maxlength="4000" placeholder="Who did you talk to? Follow-ups, ideas…"></textarea>
+      </article>
+
+      <div class="loading" id="loading">Loading the hall…</div>
+    </section>
+
+    <aside class="sidebar" aria-label="Exhibitors">
+      <div class="side-head">
+        <label class="search">
+          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="search" type="search" placeholder="Search name, booth, topic or note" autocomplete="off" aria-label="Search exhibitors">
+        </label>
+        <div class="filters" role="group" aria-label="Filter">
+          <button type="button" class="chip active" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="star" aria-pressed="false">Starred</button>
+          <button type="button" class="chip" data-filter="todo" aria-pressed="false">To visit</button>
+          <button type="button" class="chip" data-filter="visited" aria-pressed="false">Visited</button>
+          <button type="button" class="chip" data-filter="notes" aria-pressed="false">Notes</button>
+        </div>
+        <div class="list-meta">
+          <span id="resultCount"></span>
+          <label class="sort">Sort
+            <select id="sort" aria-label="Sort exhibitors">
+              <option value="name">A–Z</option>
+              <option value="booth">Booth no.</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <ul class="list" id="list" role="listbox" aria-label="Startups"></ul>
+      <div class="side-foot">
+        <button type="button" class="btn ghost small" id="exportBtn">Export my notes</button>
+        <span class="foot-note">Saved on this device<span id="footSync"></span></span>
+      </div>
+    </aside>
+  </main>
+
+  <dialog class="modal" id="authModal" aria-labelledby="authTitle">
+    <form method="dialog" class="modal-body" id="authForm" novalidate>
+      <button type="button" class="close" id="authClose" aria-label="Close">×</button>
+      <h2 id="authTitle">Sync your booth notes</h2>
+      <p class="muted" id="authIntro">Your visits and notes are saved on this device. Sign in with your email to keep them in sync across your phone and laptop.</p>
+      <div id="stepEmail">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
+      </div>
+      <div id="stepCode" hidden>
+        <label for="authCode">6-digit code sent to <span id="authEmailEcho"></span></label>
+        <input id="authCode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="8" placeholder="123456">
+      </div>
+      <div id="stepSignedIn" hidden>
+        <p>Signed in as <strong id="authWho"></strong>. Your marks sync automatically.</p>
+      </div>
+      <p class="form-error" id="authError" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="authBack" hidden>Use another email</button>
+        <button type="submit" class="btn primary" id="authSubmit">Send code</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
