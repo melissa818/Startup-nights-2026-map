@@ -2,20 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Startup Nights 2026 Booth Map</title>
   <meta name="description" content="Interactive 3D floor plan of Startup Nights 2026: find every startup's booth, read what they do, mark booths you visited and keep notes.">
   <meta name="theme-color" content="#1c1c1c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SN26 Map">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c1c1c'/%3E%3Crect x='7' y='7' width='8' height='8' rx='2' fill='%23ffc800'/%3E%3Crect x='17' y='7' width='8' height='8' rx='2' fill='%232ebd6b'/%3E%3Crect x='7' y='17' width='8' height='8' rx='2' fill='%234c8dff'/%3E%3Crect x='17' y='17' width='8' height='8' rx='2' fill='%23ffc800'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/app.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "./vendor/three/three.module.min.js",
-        "three/addons/controls/OrbitControls.js": "./vendor/three/OrbitControls.js"
-      }
-    }
-  </script>
 </head>
 <body>
   <header class="topbar">
@@ -32,7 +30,7 @@
     </div>
     <div class="account">
       <span class="sync" id="syncStatus" hidden></span>
-      <button class="btn ghost" id="accountBtn" type="button">Sync across devices</button>
+      <button class="btn ghost" id="accountBtn" type="button"><span class="btn-long">Sync across devices</span><span class="btn-short">Sync</span></button>
     </div>
   </header>
 
@@ -60,6 +58,7 @@
       </div>
 
       <div class="tooltip" id="tooltip" role="status" hidden></div>
+      <div class="gesture-hint" id="gestureHint" hidden>Drag to rotate · pinch to zoom · two fingers to move</div>
       <div class="name-tag" id="nameTag" hidden></div>
 
       <article class="detail" id="detail" hidden aria-labelledby="detailName">

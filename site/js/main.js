@@ -42,7 +42,22 @@ const ui = {
   sort: 'name',
 };
 
-const scene = new FloorScene($('map'), venue);
+// If WebGL is unavailable the list, details and marks still work; only the 3D view is replaced.
+function createScene() {
+  try {
+    return new FloorScene($('map'), venue);
+  } catch (err) {
+    console.error(err);
+    $('map').innerHTML = '<div class="map-error">The 3D floor plan needs WebGL, which this browser has turned off. The list, details and your marks still work.</div>';
+    document.querySelector('.map-tools').hidden = true;
+    const noop = () => {};
+    return Object.assign(new EventTarget(), {
+      setBoothState: noop, select: noop, focus: noop, setTopView: noop, zoomBy: noop, resetView: noop, setInsetLeft: noop,
+      screenPoint: () => null, onFrame: null,
+    });
+  }
+}
+const scene = createScene();
 $('totalCount').textContent = startups.length;
 
 function matches(s) {
@@ -160,7 +175,7 @@ function flushNote() {
 
 function renderDetail() {
   const s = byId.get(ui.selected);
-  if (!s) { detail.hidden = true; return; }
+  if (!s) { detail.hidden = true; updateInset(); return; }
   const m = store.get(s.id);
   const onMap = s.booths.some((b) => mapBooths.has(b));
   const chips = [`<span class="tag booth">Booth ${esc(boothLabel(s.booths))}</span>`];
@@ -207,6 +222,13 @@ function renderDetail() {
     $('noteInput').value = m.note || '';
   }
   detail.hidden = false;
+  updateInset();
+}
+
+// On wide screens the card floats over the map's lower left; shift the view so the booth stays visible.
+function updateInset() {
+  const overMap = !detail.hidden && detail.parentElement?.classList.contains('map-pane');
+  scene.setInsetLeft(overMap ? detail.offsetWidth + 14 : 0);
 }
 
 function select(id, { fly = false, scroll = false } = {}) {
@@ -242,12 +264,12 @@ $('noteInput').addEventListener('input', () => {
 $('noteInput').addEventListener('blur', flushNote);
 
 // The detail card floats over the map on wide screens and sits above the list on phones.
-const narrow = window.matchMedia('(max-width: 860px)');
+const narrow = window.matchMedia('(max-width: 860px), (max-height: 560px) and (orientation: landscape)');
 function placeDetail() {
   if (narrow.matches) document.querySelector('.sidebar').prepend(detail);
   else document.querySelector('.map-pane').append(detail);
 }
-narrow.addEventListener('change', placeDetail);
+narrow.addEventListener('change', () => { placeDetail(); updateInset(); });
 placeDetail();
 
 // ---------- map interaction ----------
@@ -393,7 +415,9 @@ function authStep(step) {
 function renderAccount() {
   const u = store.user;
   $('accountBtn').hidden = !store.backend;
-  $('accountBtn').textContent = u ? u.email : 'Sync across devices';
+  $('accountBtn').innerHTML = u
+    ? esc(u.email)
+    : '<span class="btn-long">Sync across devices</span><span class="btn-short">Sync</span>';
   $('accountBtn').title = u ? 'Signed in: your marks sync across devices' : 'Sign in with your email to sync your marks';
   $('footSync').textContent = u ? ' and synced to your account' : '';
 }
@@ -453,6 +477,24 @@ store.addEventListener('sync', (e) => {
   el.hidden = !v;
   if (v) { el.textContent = v[0]; el.className = `sync ${v[1]}`; }
 });
+
+// ---------- touch gesture hint (once per device) ----------
+
+if (window.matchMedia('(pointer: coarse)').matches && $('gestureHint')) {
+  let seen = false;
+  try { seen = localStorage.getItem('sn26.hint') === '1'; } catch { /* storage blocked */ }
+  if (!seen) {
+    const hint = $('gestureHint');
+    hint.hidden = false;
+    const dismiss = () => {
+      hint.classList.add('gone');
+      setTimeout(() => hint.remove(), 450);
+      try { localStorage.setItem('sn26.hint', '1'); } catch { /* storage blocked */ }
+    };
+    $('map').addEventListener('pointerdown', dismiss, { once: true });
+    setTimeout(dismiss, 7000);
+  }
+}
 
 // ---------- start ----------
 

@@ -1,6 +1,6 @@
 // 3D floor plan of the Startup Nights 2026 hall, built from venue.json (PDF point units).
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from '../vendor/three/three.module.min.js';
+import { OrbitControls } from '../vendor/three/OrbitControls.js';
 
 export const BOOTH_COLORS = {
   base: '#ffd66b',
@@ -52,6 +52,8 @@ export class FloorScene extends EventTarget {
     this.tween = null;
     this.clock = new THREE.Clock();
     this.onFrame = null;
+    this.inset = 0;        // px of the canvas covered on the left (detail card); the view centres on the rest
+    this.insetTarget = 0;
 
     this.initRenderer();
     this.buildGround();
@@ -115,6 +117,19 @@ export class FloorScene extends EventTarget {
     const h = Math.max(1, this.container.clientHeight);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
+    this.applyInset();
+  }
+
+  // Keep the camera target centred in the part of the canvas not covered by the detail card.
+  setInsetLeft(px) {
+    this.insetTarget = Math.max(0, Math.min(px, this.container.clientWidth * 0.6));
+  }
+
+  applyInset() {
+    const w = Math.max(1, this.container.clientWidth);
+    const h = Math.max(1, this.container.clientHeight);
+    if (this.inset > 0.5) this.camera.setViewOffset(w, h, -this.inset / 2, 0, w, h);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
   }
 
@@ -508,12 +523,14 @@ export class FloorScene extends EventTarget {
     if (!list.length) return;
     const target = this.centerOf(list);
     const span = Math.max(this.spanOf(list), 30);
+    // Small map panes (phones) get a closer view so the booth isn't tiny.
+    const near = Math.min(this.container.clientWidth, this.container.clientHeight) < 500 ? 0.72 : 1;
     if (this.topView) {
-      const h = Math.max(330, span * 5);
+      const h = Math.max(330, span * 5) * near;
       this.flyTo(new THREE.Vector3(target.x, h, target.z + 0.01), target, animate ? 750 : 0);
       return;
     }
-    const dist = Math.max(300, span * 4);
+    const dist = Math.max(300, span * 4) * near;
     // Keep the current compass direction, but use a comfortable tilt.
     const off = this.camera.position.clone().sub(this.controls.target);
     const azimuth = Math.atan2(off.x, off.z);
@@ -633,6 +650,11 @@ export class FloorScene extends EventTarget {
         if (k >= 1) this.tween = null;
       }
       this.controls.update();
+      if (Math.abs(this.inset - this.insetTarget) > 0.5) {
+        this.inset += (this.insetTarget - this.inset) * Math.min(1, dt * 8 + 0.05);
+        if (Math.abs(this.inset - this.insetTarget) <= 0.5) this.inset = this.insetTarget;
+        this.applyInset();
+      }
 
       for (const b of this.booths.values()) {
         if (Math.abs(b.height - b.targetH) > 0.01) {
