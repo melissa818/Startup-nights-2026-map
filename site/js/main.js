@@ -8,7 +8,6 @@ const fold = (s) => String(s ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').to
 
 const ICON_STAR = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 2.5l2.3 4.8 5.2.7-3.8 3.6.9 5.2L10 14.3l-4.6 2.5.9-5.2L2.5 8l5.2-.7z" fill="currentColor"/></svg>';
 const LANGROVE_ID = 'langrove';
-const BROWSE_KEY = 'sn26.browse';
 
 const storageGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
 const storageSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } };
@@ -893,10 +892,9 @@ let authEmail = '';
 let authReason = null;
 
 const REASONS = {
-  intro: 'Sign in with your email to star booths you\'re interested in and keep private notes. Only you can see them, on any device.',
-  mark: 'Sign in to star booths and keep notes. Your notes are private: only you can see them.',
-  booth: 'Sign in to keep private notes about the people who visit your booth.',
-  notes: 'Sign in to write notes. They are private: only you can see them, on any device.',
+  mark: 'Star booths and keep private notes.',
+  booth: 'Keep private notes on people who visit your booth.',
+  notes: 'Write private notes. Only you can see them.',
 };
 
 function authStep(step) {
@@ -907,10 +905,8 @@ function authStep(step) {
   $('authIntro').hidden = step === 'done' || step === 'delete';
   $('authBack').hidden = step !== 'code';
   $('authCancelDelete').hidden = step !== 'delete';
-  $('authBrowse').hidden = !(step === 'email' && authReason === 'intro');
   $('authTitle').textContent = step === 'done' ? 'Your account'
-    : step === 'delete' ? 'Delete your account?'
-    : authReason === 'intro' ? 'Startup Nights 2026 booth map' : 'Sign in';
+    : step === 'delete' ? 'Delete your account?' : 'Sign in';
   $('authSubmit').textContent = { email: 'Send code', code: 'Sign in', done: 'Sign out', delete: 'Delete account' }[step];
   $('authSubmit').className = step === 'done' ? 'btn' : step === 'delete' ? 'btn danger' : 'btn primary';
   $('authError').textContent = '';
@@ -932,7 +928,6 @@ function openAuth(reason = 'mark') {
 }
 
 function closeAuth() {
-  if (authReason === 'intro') storageSet(BROWSE_KEY, '1');
   if (modal.open) modal.close();
 }
 
@@ -952,8 +947,6 @@ function renderAccount() {
 
 $('accountBtn').addEventListener('click', () => openAuth(store.user ? 'account' : 'mark'));
 $('authClose').addEventListener('click', closeAuth);
-$('authBrowse').addEventListener('click', closeAuth);
-modal.addEventListener('cancel', () => { if (authReason === 'intro') storageSet(BROWSE_KEY, '1'); });
 $('authBack').addEventListener('click', () => { authStep('email'); $('authEmail').focus(); });
 $('authDeleteStart').addEventListener('click', () => { authStep('delete'); $('authCancelDelete').focus(); });
 $('authCancelDelete').addEventListener('click', () => { authStep('done'); $('authSubmit').focus(); });
@@ -977,7 +970,7 @@ $('authForm').addEventListener('submit', async (e) => {
     if (step === 'email') {
       authEmail = $('authEmail').value.trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(authEmail)) throw new Error('Please enter a valid email address.');
-      if (!$('authAgree').checked) throw new Error('Please accept the terms of use and chat rules to sign in.');
+      if (!$('authAgree').checked) throw new Error('Please tick the box to continue.');
       await store.requestCode(authEmail);
       $('authEmailEcho').textContent = authEmail;
       $('authCode').value = '';
@@ -993,7 +986,6 @@ $('authForm').addEventListener('submit', async (e) => {
         if (err.status === 401) throw new Error('That code did not work. Check the email or request a new one.');
         throw err;
       }
-      storageSet(BROWSE_KEY, '1');
       // They ticked the box on the first step: record which terms they accepted.
       if (!store.termsAccepted) await store.acceptTerms().catch(() => {});
       modal.close();
@@ -1018,7 +1010,7 @@ $('authForm').addEventListener('submit', async (e) => {
   }
 });
 
-// ---------- terms of use, chat rules and privacy policy ----------
+// ---------- terms of use and privacy policy ----------
 
 const termsModal = $('termsModal');
 // Signed-in visitors must have accepted the current terms; returns true when they have.
@@ -1186,5 +1178,3 @@ chat = initAssistant({
 });
 // Accounts from before the terms existed accept them once (or sign out).
 ensureTerms();
-// First visit without an account: offer sign-in once, with the option to just browse.
-if (store.backend && !store.signedIn && storageGet(BROWSE_KEY) !== '1') openAuth('intro');

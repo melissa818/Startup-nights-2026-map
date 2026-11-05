@@ -199,18 +199,11 @@
     <form method="dialog" class="modal-body" id="authForm" novalidate>
       <button type="button" class="close" id="authClose" aria-label="Close">×</button>
       <h2 id="authTitle">Sign in</h2>
-      <p class="muted" id="authIntro">Sign in with your email to star booths you're interested in and keep private notes. Only you can see them, on any device.</p>
+      <p class="muted" id="authIntro">Star booths and keep private notes.</p>
       <div id="stepEmail">
         <label for="authEmail">Email</label>
         <input id="authEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
-        <div class="consent">
-          <ul>
-            <li>An independent demo by Langrove for Startup Nights 2026, not an official Startup Nights app.</li>
-            <li>The AI assistant can make mistakes. Don't share personal or confidential information with it.</li>
-            <li>All data is deleted on 6 December 2026.</li>
-          </ul>
-          <label class="check"><input type="checkbox" id="authAgree"> <span>I accept the <a href="legal.html#terms" data-legal="terms">Terms of use</a> and have read the <a href="legal.html#privacy" data-legal="privacy">Privacy policy</a>.</span></label>
-        </div>
+        <label class="check consent"><input type="checkbox" id="authAgree"> <span>I agree to the <a href="legal.html#terms" data-legal="terms">Terms</a> and <a href="legal.html#privacy" data-legal="privacy">Privacy policy</a></span></label>
       </div>
       <div id="stepCode" hidden>
         <label for="authCode">6-digit code sent to <span id="authEmailEcho"></span></label>
@@ -228,7 +221,6 @@
       </div>
       <p class="form-error" id="authError" role="alert"></p>
       <div class="modal-actions">
-        <button type="button" class="btn ghost" id="authBrowse" hidden>Just browse the map</button>
         <button type="button" class="btn ghost" id="authBack" hidden>Use another email</button>
         <button type="button" class="btn ghost" id="authCancelDelete" hidden>Keep my account</button>
         <button type="submit" class="btn primary" id="authSubmit">Send code</button>
@@ -278,16 +270,9 @@
 
   <dialog class="modal" id="termsModal" aria-labelledby="termsTitle">
     <form class="modal-body" id="termsForm" novalidate>
-      <h2 id="termsTitle">Before you continue</h2>
-      <p class="muted">We updated the terms of use and privacy policy for the new AI assistant. Please accept them to keep using your account.</p>
-        <div class="consent">
-          <ul>
-            <li>An independent demo by Langrove for Startup Nights 2026, not an official Startup Nights app.</li>
-            <li>The AI assistant can make mistakes. Don't share personal or confidential information with it.</li>
-            <li>All data is deleted on 6 December 2026.</li>
-          </ul>
-          <label class="check"><input type="checkbox" id="termsAgree"> <span>I accept the <a href="legal.html#terms" data-legal="terms">Terms of use</a> and have read the <a href="legal.html#privacy" data-legal="privacy">Privacy policy</a>.</span></label>
-        </div>
+      <h2 id="termsTitle">Updated terms</h2>
+      <p class="muted">Please accept them to keep using your account.</p>
+        <label class="check consent"><input type="checkbox" id="termsAgree"> <span>I agree to the <a href="legal.html#terms" data-legal="terms">Terms</a> and <a href="legal.html#privacy" data-legal="privacy">Privacy policy</a></span></label>
       <p class="form-error" id="termsError" role="alert"></p>
       <div class="modal-actions">
         <button type="button" class="btn ghost" id="termsSignOut">Sign out</button>

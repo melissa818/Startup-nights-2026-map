@@ -6,7 +6,7 @@
 // synced to the Langrove backend; newest edit wins. Signing out clears the device cache.
 
 const LEGACY_KEY = 'sn26.marks.v1'; // marks saved before sign-in existed
-// Version of the terms of use, chat rules and privacy policy (legal.html). The backend checks the same value.
+// Version of the terms of use and privacy policy (legal.html). The backend checks the same value.
 export const TERMS_VERSION = '2026-11-05b';
 const SYNC_DELAY_MS = 1000;
 
