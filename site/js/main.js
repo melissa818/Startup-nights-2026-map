@@ -737,7 +737,9 @@ $('welcomeClose').addEventListener('click', hideWelcome);
 // ---------- search, filters, sort ----------
 
 let searchTimer = null;
+const syncSearchClear = () => { $('searchClear').hidden = !$('search').value; };
 $('search').addEventListener('input', () => {
+  syncSearchClear();
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
     ui.query = fold($('search').value.trim());
@@ -754,6 +756,22 @@ $('search').addEventListener('keydown', (e) => {
   $('search').blur();
 });
 $('search').addEventListener('focus', () => { if (sheetMode.matches && sheet.state !== 'full') setSheet('full'); });
+// The ✕ clears the search in one tap. Pressing it does not take focus from the field, so a phone
+// keyboard that is open stays open for the next search.
+$('searchClear').addEventListener('pointerdown', (e) => e.preventDefault());
+$('searchClear').addEventListener('click', () => {
+  const input = $('search');
+  const wasFocused = document.activeElement === input;
+  clearTimeout(searchTimer);
+  input.value = '';
+  ui.query = '';
+  syncSearchClear();
+  renderList();
+  refreshBooths();
+  if (wasFocused || !sheetMode.matches) input.focus();
+});
+// Tapping the magnifier or padding of the search bar focuses the field (it used to be a label).
+$('searchBox').addEventListener('click', (e) => { if (!e.target.closest('button, input')) $('search').focus(); });
 
 // ---------- general notes ----------
 
