@@ -491,7 +491,7 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .share-btn { padding-left: 10px; padding-right: 10px; }
 }
 @media (max-width: 360px) {
-  .topbar { padding-left: 10px; padding-right: 10px; }
+  .topbar { padding-left: 10px; padding-right: 10px; column-gap: 6px; }
   .brand { gap: 8px; }
   .brand h1 { font-size: 14px; }
   .account { gap: 6px; }
