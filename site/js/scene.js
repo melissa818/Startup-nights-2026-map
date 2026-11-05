@@ -60,8 +60,11 @@ export class FloorScene extends EventTarget {
     this.clock = new THREE.Clock();
     this.onFrame = null;
     this.needsRender = true; // draw only when something changed, to save battery on phones
-    this.inset = 0;        // px of the canvas covered on the left (detail card); the view centres on the rest
-    this.insetTarget = 0;
+    // px of the canvas covered by UI: on the left (detail card) and at the bottom (phone list sheet).
+    // The view centres on the uncovered part.
+    this.inset = { l: 0, b: 0 };
+    this.insetTarget = { l: 0, b: 0 };
+    this.placeGroup = null; // highlighted rooms / points for a selected place
 
     this.initRenderer();
     this.buildGround();
@@ -139,13 +142,18 @@ export class FloorScene extends EventTarget {
 
   // Keep the camera target centred in the part of the canvas not covered by the detail card.
   setInsetLeft(px) {
-    this.insetTarget = Math.max(0, Math.min(px, this.container.clientWidth * 0.6));
+    this.insetTarget.l = Math.max(0, Math.min(px, this.container.clientWidth * 0.6));
+  }
+
+  setInsetBottom(px) {
+    this.insetTarget.b = Math.max(0, Math.min(px, this.container.clientHeight * 0.85));
   }
 
   applyInset() {
     const w = Math.max(1, this.container.clientWidth);
     const h = Math.max(1, this.container.clientHeight);
-    if (this.inset > 0.5) this.camera.setViewOffset(w, h, -this.inset / 2, 0, w, h);
+    const { l, b } = this.inset;
+    if (l > 0.5 || b > 0.5) this.camera.setViewOffset(w, h, -l / 2, b / 2, w, h);
     else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
   }
@@ -378,6 +386,76 @@ export class FloorScene extends EventTarget {
     ctx.restore();
   }
 
+  // items: venue rooms ({ poly, kind, inset }) and/or points ({ x, y }); null clears.
+  highlightPlace(items) {
+    if (this.placeGroup) {
+      this.scene.remove(this.placeGroup);
+      this.placeGroup.traverse((o) => { o.geometry?.dispose(); o.material?.dispose?.(); });
+      this.placeGroup = null;
+    }
+    this.needsRender = true;
+    if (!items || !items.length) return;
+    const g = new THREE.Group();
+    g.userData.rings = [];
+    let top = 0;
+    const centers = [];
+    const ring = (x, z, radius, y) => {
+      const r = new THREE.Mesh(new THREE.RingGeometry(0.82, 1, 48),
+        new THREE.MeshBasicMaterial({ color: BOOTH_COLORS.selected, transparent: true, opacity: 0.7, side: THREE.DoubleSide, depthWrite: false }));
+      r.rotation.x = -Math.PI / 2;
+      r.position.set(x, y, z);
+      r.userData.radius = radius;
+      g.userData.rings.push(r);
+      g.add(r);
+    };
+    for (const it of items) {
+      if (it.poly) {
+        const h = it.inset ? ROOM_H.area + 0.8 : ROOM_H[it.kind] || 4;
+        const shape = new THREE.Shape(it.poly.map(([x, y]) => new THREE.Vector2(this.wx(x), -this.wz(y))));
+        const geo = new THREE.ShapeGeometry(shape);
+        geo.rotateX(-Math.PI / 2);
+        const fill = new THREE.Mesh(geo, decal({ color: BOOTH_COLORS.selected, opacity: 0.42 }));
+        fill.position.y = h + 0.15;
+        fill.renderOrder = 4;
+        g.add(fill);
+        const [x0, y0, x1, y1] = polyBBox(it.poly);
+        const cx = this.wx((x0 + x1) / 2), cz = this.wz((y0 + y1) / 2);
+        ring(cx, cz, Math.hypot(x1 - x0, y1 - y0) / 2 + 6, 0.25);
+        centers.push(new THREE.Vector3(cx, h, cz));
+        top = Math.max(top, h);
+      } else {
+        const x = this.wx(it.x), z = this.wz(it.y);
+        const disc = new THREE.Mesh(new THREE.CircleGeometry(4.5, 32), decal({ color: BOOTH_COLORS.selected, opacity: 0.9 }));
+        disc.rotation.x = -Math.PI / 2;
+        disc.position.set(x, 3, z);
+        g.add(disc);
+        ring(x, z, 10, 0.3);
+        centers.push(new THREE.Vector3(x, 3, z));
+        top = Math.max(top, 3);
+      }
+    }
+    const c = new THREE.Vector3();
+    centers.forEach((v) => c.add(v));
+    c.divideScalar(centers.length);
+    c.y = top;
+    g.userData.center = c;
+    this.placeGroup = g;
+    this.scene.add(g);
+  }
+
+  // Screen position above the highlighted place, for its name tag.
+  placeScreenPoint() {
+    if (!this.placeGroup) return null;
+    const p = this.placeGroup.userData.center.clone();
+    p.y += 6;
+    p.project(this.camera);
+    if (p.z > 1) return null;
+    return {
+      x: (p.x * 0.5 + 0.5) * this.container.clientWidth,
+      y: (-p.y * 0.5 + 0.5) * this.container.clientHeight - 8,
+    };
+  }
+
   buildMarkers() {
     // Selection pin: a cone with a ball, bobbing above the booth.
     const pinMat = new THREE.MeshStandardMaterial({ color: BOOTH_COLORS.selected, emissive: '#5a1d00', roughness: 0.35 });
@@ -548,8 +626,19 @@ export class FloorScene extends EventTarget {
   focus(ids, animate = true) {
     const list = ids.filter((id) => this.booths.has(id));
     if (!list.length) return;
-    const target = this.centerOf(list);
-    const span = Math.max(this.spanOf(list), 30);
+    this.focusOn(this.centerOf(list), Math.max(this.spanOf(list), 30), animate);
+  }
+
+  // Fly to plan-coordinate points (a place's rooms or markers).
+  focusPlan(points, animate = true) {
+    if (!points.length) return;
+    const xs = points.map(([x]) => this.wx(x)), zs = points.map(([, y]) => this.wz(y));
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
+    const target = new THREE.Vector3((x0 + x1) / 2, 0, (z0 + z1) / 2);
+    this.focusOn(target, Math.max(Math.hypot(x1 - x0, z1 - z0), 40), animate);
+  }
+
+  focusOn(target, span, animate) {
     // Small map panes (phones) get a closer view so the booth isn't tiny.
     const near = Math.min(this.container.clientWidth, this.container.clientHeight) < 500 ? 0.72 : 1;
     if (this.topView) {
@@ -635,7 +724,7 @@ export class FloorScene extends EventTarget {
       down = null;
       if (moved > 7 || !quick || e.button > 0) return;
       const h = hit(e);
-      this.dispatchEvent(new CustomEvent('pick', { detail: { boothId: h?.boothId || null } }));
+      this.dispatchEvent(new CustomEvent('pick', { detail: { boothId: h?.boothId || null, room: h?.room || null } }));
     });
     el.addEventListener('pointermove', (e) => {
       if (e.pointerType !== 'mouse' || e.buttons) return;
@@ -679,12 +768,15 @@ export class FloorScene extends EventTarget {
         if (k >= 1) this.tween = null;
       }
       if (this.controls.update()) active = true;
-      if (Math.abs(this.inset - this.insetTarget) > 0.5) {
-        active = true;
-        this.inset += (this.insetTarget - this.inset) * Math.min(1, dt * 8 + 0.05);
-        if (Math.abs(this.inset - this.insetTarget) <= 0.5) this.inset = this.insetTarget;
-        this.applyInset();
+      let insetMoved = false;
+      for (const k of ['l', 'b']) {
+        if (Math.abs(this.inset[k] - this.insetTarget[k]) > 0.5) {
+          this.inset[k] += (this.insetTarget[k] - this.inset[k]) * Math.min(1, dt * 8 + 0.05);
+          if (Math.abs(this.inset[k] - this.insetTarget[k]) <= 0.5) this.inset[k] = this.insetTarget[k];
+          insetMoved = true;
+        }
       }
+      if (insetMoved) { active = true; this.applyInset(); }
 
       for (const b of this.booths.values()) {
         if (Math.abs(b.height - b.targetH) > 0.01) {
@@ -705,6 +797,14 @@ export class FloorScene extends EventTarget {
         const pulse = (t * 0.9) % 1;
         this.ring.scale.setScalar(r * (0.8 + pulse * 0.6));
         this.ring.material.opacity = 0.75 * (1 - pulse);
+      }
+      if (this.placeGroup) {
+        active = true;
+        const pulse = (t * 0.9) % 1;
+        for (const r of this.placeGroup.userData.rings) {
+          r.scale.setScalar(r.userData.radius * (0.8 + pulse * 0.6));
+          r.material.opacity = 0.75 * (1 - pulse);
+        }
       }
       if (!active) return;
       this.needsRender = false;

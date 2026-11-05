@@ -124,14 +124,16 @@
       <div class="loading" id="loading">Loading the hall…</div>
     </section>
 
-    <aside class="sidebar" aria-label="Exhibitors">
+    <aside class="sidebar" aria-label="Exhibitors and places">
+      <button type="button" class="sheet-handle" id="sheetHandle" aria-label="Hide the list and show the map" aria-expanded="true"><span></span></button>
       <div class="side-head">
         <label class="search">
           <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <input id="search" type="search" placeholder="Search name, booth, topic or note" autocomplete="off" aria-label="Search exhibitors">
+          <input id="search" type="search" placeholder="Search startups, booths, workshops…" autocomplete="off" aria-label="Search exhibitors and places">
         </label>
         <div class="filters" role="group" aria-label="Filter">
           <button type="button" class="chip active" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="chip" data-filter="places" aria-pressed="false">Places</button>
           <button type="button" class="chip" data-filter="star" aria-pressed="false">Starred</button>
           <button type="button" class="chip" data-filter="todo" aria-pressed="false">To visit</button>
           <button type="button" class="chip" data-filter="visited" aria-pressed="false">Visited</button>

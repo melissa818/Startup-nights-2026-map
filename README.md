@@ -5,6 +5,11 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
 
 - **Find a startup two ways.** Pick a name in the scrollable list on the right and the camera flies to
   its booth, or click a booth on the 3D floor plan to see who is there.
+- **Places.** Search also finds rooms and areas (workshops, stages, bars, food, toilets, lounges,
+  entrance, matchmaking, emergency exits); a "Places" filter lists them all. Choosing one highlights
+  it on the map and shows a short card; tapping a room on the 3D map does the same.
+- **Phones.** The list is a sheet over a full-screen map: pull it down to a slim search bar to see the
+  whole map, pull it up (or tap the handle or the search box) to browse again.
 - **Startup details.** Each selection shows a short description, category and a link to the startup's
   website (from web research, see below).
 - **Track your visit.** Signed-in visitors mark booths as *visited* (turns green) or *interested*

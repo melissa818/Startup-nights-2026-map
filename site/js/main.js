@@ -40,10 +40,63 @@ function boothLabel(booths) {
 
 const ownStartup = () => (store.user && store.user.own_startup) || null;
 
+// ---------- places: rooms and areas people can search for ----------
+
+const KINDS = {
+  workshop: { label: 'Workshop', words: 'workshop workshops session sessions class', info: 'Workshop room. Check the event programme for session times.' },
+  stage: { label: 'Stage', words: 'stage stages talk talks keynote pitch pitches panel', info: 'Stage for talks, panels and pitches. Check the event programme for the schedule.' },
+  bar: { label: 'Bar', words: 'bar bars drink drinks beer cocktail', info: 'Bar with drinks.' },
+  food: { label: 'Food & drinks', words: 'food eat snack snacks drink drinks lunch dinner', info: 'Food and drinks.' },
+  lounge: { label: 'Lounge', words: 'lounge lounges', info: 'Lounge.' },
+  service: { label: 'Facilities', words: 'facilities', info: '' },
+  area: { label: 'Area', words: 'area', info: '' },
+  entrance: { label: 'Entrance', words: 'entrance entry door way in', info: 'Main entrance to the hall.' },
+  exit: { label: 'Safety', words: 'exit exits emergency fire safety', info: 'Emergency exits around the hall.' },
+};
+const PLACE_EXTRA = {
+  'Toilets': { words: 'toilet wc restroom restrooms bathroom loo', info: 'Toilets.' },
+  'Smoking Area': { words: 'smoking smoke cigarette', info: 'Smoking area outside the hall.' },
+  'Gaming Area': { words: 'gaming games play', info: 'Gaming area.' },
+  'Dart Area': { words: 'darts dart games play', info: 'Darts.' },
+  'Cisco': { words: 'cisco partner', info: 'Cisco area.' },
+  'PhotoBus': { words: 'photo photos picture pictures', info: 'Photo bus.' },
+  'Café': { words: 'coffee cafe', info: 'Café.' },
+  'Matchmaking': { words: 'matchmaking networking meet meeting', info: 'Matchmaking area by the entrance.' },
+  'Foyer': { words: 'foyer', info: 'Foyer in the middle of the hall.' },
+};
+const slugify = (t) => fold(t).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const places = (() => {
+  const map = new Map();
+  const add = (name, kind, item) => {
+    const id = slugify(name);
+    if (!map.has(id)) map.set(id, { id, name, kind, items: [] });
+    map.get(id).items.push(item);
+  };
+  for (const r of venue.rooms) if (r.name) add(r.name, r.kind, r);
+  add('Entrance', 'entrance', { x: 70, y: 412 });
+  add('Matchmaking', 'area', { x: 31, y: 328 });
+  add('Foyer', 'area', { x: 466, y: 330 });
+  for (const [x, y] of venue.exits) add('Emergency exits', 'exit', { x, y });
+  const list = [...map.values()];
+  for (const p of list) {
+    const k = KINDS[p.kind] || KINDS.area;
+    const extra = PLACE_EXTRA[p.name] || {};
+    p.kindLabel = k.label;
+    p.info = extra.info || k.info;
+    p.search = fold(`${p.name} ${k.label} ${k.words} ${extra.words || ''}`);
+    p.points = p.items.flatMap((it) => (it.poly ? it.poly : [[it.x, it.y]]));
+  }
+  return list.sort((a, b) => a.kindLabel.localeCompare(b.kindLabel) || a.name.localeCompare(b.name));
+})();
+const placeById = new Map(places.map((p) => [p.id, p]));
+const placeByName = new Map(places.map((p) => [p.name, p]));
+
 // ---------- state ----------
 
 const ui = {
   selected: null,
+  place: null,     // selected place id (room or area)
   spotlight: null, // a booth highlighted without opening its card (first-login welcome)
   filter: 'all',
   query: '',
@@ -61,6 +114,7 @@ function createScene() {
     const noop = () => {};
     return Object.assign(new EventTarget(), {
       setBoothState: noop, select: noop, focus: noop, setTopView: noop, zoomBy: noop, resetView: noop, setInsetLeft: noop,
+      setInsetBottom: noop, highlightPlace: noop, focusPlan: noop, placeScreenPoint: () => null,
       screenPoint: () => null, onFrame: null,
     });
   }
@@ -69,6 +123,7 @@ const scene = createScene();
 $('totalCount').textContent = startups.length;
 
 function matches(s) {
+  if (ui.filter === 'places') return false;
   const m = store.get(s.id);
   if (ui.filter === 'star' && !m.interested) return false;
   if (ui.filter === 'visited' && !m.visited) return false;
@@ -81,6 +136,13 @@ function matches(s) {
     if (s.booths.some((b) => Number(b) === n || b.includes(q))) return true;
   }
   return fold(`${s.name} ${s.category || ''} ${s.description || ''} ${m.note || ''}`).includes(q);
+}
+
+function placeMatches(p) {
+  if (ui.filter !== 'all' && ui.filter !== 'places') return false;
+  if (!ui.query) return ui.filter === 'places';
+  if (/^\d+$/.test(ui.query)) return false;
+  return p.search.includes(ui.query);
 }
 
 function filtering() {
@@ -132,10 +194,35 @@ function sorted(list) {
   return out;
 }
 
+const PLACE_ICON = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 18s5.5-5.2 5.5-9.6A5.5 5.5 0 0 0 4.5 8.4C4.5 12.8 10 18 10 18z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="8.4" r="2" fill="currentColor"/></svg>';
+
+function placeRow(p) {
+  const n = p.items.length;
+  const sub = n > 1 ? `${p.kindLabel} · ${n} locations` : p.kindLabel;
+  return `<li class="item place kind-${esc(p.kind)}" data-place="${esc(p.id)}" ${ui.place === p.id ? 'aria-current="true"' : ''}>
+    <button type="button" class="item-main" data-act="place" aria-label="${esc(p.name)}, ${esc(sub)}">
+      <span class="num">${PLACE_ICON}</span>
+      <span class="txt"><span class="name">${esc(p.name)}</span><span class="sub">${esc(sub)}</span></span>
+    </button>
+  </li>`;
+}
+
 function renderList() {
   const items = sorted(startups.filter(matches));
-  $('resultCount').textContent = filtering() ? `${items.length} of ${startups.length} exhibitors` : `${startups.length} exhibitors`;
+  const placeHits = places.filter(placeMatches);
+  if (ui.filter === 'places') {
+    $('resultCount').textContent = `${placeHits.length} places`;
+    $('list').innerHTML = placeHits.length ? placeHits.map(placeRow).join('') : '<li class="empty">No place matches your search.</li>';
+    return;
+  }
+  $('resultCount').textContent = filtering()
+    ? `${items.length} of ${startups.length} exhibitors${placeHits.length ? ` · ${placeHits.length} places` : ''}`
+    : `${startups.length} exhibitors`;
   const rows = [];
+  if (placeHits.length) {
+    rows.push('<li class="section">Places</li>', ...placeHits.map(placeRow));
+    if (items.length) rows.push('<li class="section">Exhibitors</li>');
+  }
   const own = byId.get(ownStartup());
   if (own && !filtering()) {
     const n = store.notesFor(own.id).length;
@@ -146,8 +233,8 @@ function renderList() {
       </button>
     </li>`);
   }
-  if (!items.length) {
-    rows.push(`<li class="empty">${ui.filter === 'all' ? 'No exhibitor matches your search.' : 'Nothing here yet. Mark booths from the map or the list.'}</li>`);
+  if (!items.length && !placeHits.length) {
+    rows.push(`<li class="empty">${ui.filter === 'all' ? 'No exhibitor or place matches your search.' : 'Nothing here yet. Mark booths from the map or the list.'}</li>`);
   }
   for (const s of items) {
     const m = store.get(s.id);
@@ -170,6 +257,7 @@ function renderList() {
 
 $('list').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-act]');
+  if (btn?.dataset.act === 'place') { selectPlace(btn.closest('li').dataset.place); return; }
   const li = e.target.closest('li[data-id]');
   if (!btn || !li) return;
   const id = li.dataset.id;
@@ -219,7 +307,24 @@ function renderBoothNotes(s) {
     : '<li class="bn-empty">No visitor notes yet.</li>';
 }
 
+function renderPlaceDetail(p) {
+  const chips = [`<span class="tag booth">${esc(p.kindLabel)}</span>`];
+  if (p.items.length > 1) chips.push(`<span class="tag">${p.items.length} locations</span>`);
+  $('detailChips').innerHTML = chips.join('');
+  $('detailName').textContent = p.name;
+  $('detailDesc').textContent = p.info || `${p.name} on the floor plan.`;
+  $('detailDesc').className = 'detail-desc';
+  $('detailLinks').innerHTML = '';
+  $('personalSection').hidden = true;
+  $('boothNotes').hidden = true;
+  $('ownBoothBtn').hidden = true;
+  detail.hidden = false;
+  updateInset();
+}
+
 function renderDetail() {
+  const place = placeById.get(ui.place);
+  if (place) { renderPlaceDetail(place); return; }
   const s = byId.get(ui.selected);
   if (!s) { detail.hidden = true; updateInset(); return; }
   const m = store.get(s.id);
@@ -284,30 +389,58 @@ function renderDetail() {
   updateInset();
 }
 
-// On wide screens the card floats over the map's lower left; shift the view so the booth stays visible.
+// Keep the selected booth in view: on wide screens the card floats over the map's lower left,
+// on phones the list sheet covers the bottom of the map.
 function updateInset() {
   const overMap = !detail.hidden && detail.parentElement?.classList.contains('map-pane');
   scene.setInsetLeft(overMap ? detail.offsetWidth + 14 : 0);
+  scene.setInsetBottom(sheetMode.matches ? sheet.height : 0);
+}
+
+function markCurrentInList() {
+  for (const li of $('list').querySelectorAll('li[data-id], li[data-place]')) {
+    const on = li.dataset.id ? li.dataset.id === ui.selected : li.dataset.place === ui.place;
+    if (on) li.setAttribute('aria-current', 'true');
+    else li.removeAttribute('aria-current');
+  }
+}
+
+function selectPlace(id, { fly = true } = {}) {
+  flushNote();
+  const p = placeById.get(id);
+  if (!p) return;
+  hideWelcome();
+  ui.selected = null;
+  ui.place = p.id;
+  scene.select(null);
+  scene.highlightPlace(p.items);
+  if (fly) scene.focusPlan(p.points);
+  renderDetail();
+  markCurrentInList();
+  revealForSelection();
+  history.replaceState(null, '', `#place-${p.id}`);
 }
 
 function select(id, { fly = false, scroll = false } = {}) {
   flushNote();
   const s = id ? byId.get(id) : null;
   ui.selected = s ? s.id : null;
+  if (ui.place) { ui.place = null; scene.highlightPlace(null); }
   if (ui.spotlight && ui.spotlight !== ui.selected) hideWelcome();
   scene.select(s ? s.booths : null);
   if (s && fly) scene.focus(s.booths);
   renderDetail();
-  for (const li of $('list').querySelectorAll('li[data-id]')) {
-    if (li.dataset.id === ui.selected) li.setAttribute('aria-current', 'true');
-    else li.removeAttribute('aria-current');
-  }
+  markCurrentInList();
   if (s && scroll) scrollListTo(s.id);
+  if (s) revealForSelection();
   const hash = s ? `#${s.id}` : ' ';
   history.replaceState(null, '', hash === ' ' ? location.pathname + location.search : hash);
 }
 
-$('detailClose').addEventListener('click', () => select(null));
+$('detailClose').addEventListener('click', () => {
+  select(null);
+  if (sheetMode.matches && sheet.state === 'card') setSheet('half');
+});
 $('toggleVisited').addEventListener('click', () => {
   if (!requireSignIn('mark')) return;
   const m = store.get(ui.selected);
@@ -373,6 +506,107 @@ function placeDetail() {
   else document.querySelector('.map-pane').append(detail);
 }
 narrow.addEventListener('change', () => { placeDetail(); updateInset(); });
+
+// ---------- list sheet on phones: pull down to see the whole map, pull up to browse ----------
+
+const sheetMode = window.matchMedia('(max-width: 860px) and (min-height: 561px)');
+const sidebar = document.querySelector('.sidebar');
+const layout = document.querySelector('.layout');
+const handle = $('sheetHandle');
+const sheet = { state: 'half', height: 0 };
+
+// Height of the open card's content, so a short card (a place) doesn't take half the screen.
+function cardContentHeight() {
+  if (detail.hidden || detail.parentElement !== sidebar) return 0;
+  const prev = detail.style.bottom;
+  detail.style.bottom = 'auto';
+  const h = detail.offsetHeight;
+  detail.style.bottom = prev;
+  return h;
+}
+
+function sheetSnaps() {
+  const H = layout.clientHeight;
+  const peek = handle.offsetHeight + document.querySelector('.side-head .search').offsetHeight + 10;
+  const half = Math.round(H * 0.5);
+  const card = Math.max(peek, Math.min(half, handle.offsetHeight + cardContentHeight()));
+  return { peek, half, card, full: H - 48 };
+}
+
+function applySheetHeight(h, animate) {
+  sidebar.classList.toggle('dragging', !animate);
+  sidebar.style.height = `${h}px`;
+  layout.style.setProperty('--sheet-h', `${h}px`);
+  // A tall sheet would push the legend up over the map buttons; fade it out instead.
+  layout.classList.toggle('sheet-tall', h > layout.clientHeight * 0.7);
+  sheet.height = h;
+}
+
+function setSheet(state, animate = true) {
+  if (!sheetMode.matches) return;
+  sheet.state = state;
+  applySheetHeight(sheetSnaps()[state], animate);
+  sidebar.dataset.sheet = state;
+  handle.setAttribute('aria-expanded', state !== 'peek');
+  handle.setAttribute('aria-label', state === 'peek' ? 'Show the list' : 'Hide the list and show the map');
+  updateInset();
+}
+
+// A booth or place chosen while the list is folded away or covers the map: show its card and the map.
+function revealForSelection() {
+  if (sheetMode.matches) setSheet('card');
+}
+
+function resetSheet() {
+  if (sheetMode.matches) setSheet(sheet.state, false);
+  else {
+    sidebar.style.height = '';
+    layout.style.removeProperty('--sheet-h');
+    layout.classList.remove('sheet-tall');
+    sheet.height = 0;
+    updateInset();
+  }
+}
+sheetMode.addEventListener('change', resetSheet);
+window.addEventListener('resize', () => { if (sheetMode.matches) setSheet(sheet.state, false); });
+
+(() => {
+  let drag = null;
+  handle.addEventListener('pointerdown', (e) => {
+    if (!sheetMode.matches) return;
+    handle.setPointerCapture(e.pointerId);
+    drag = { y: e.clientY, h: sheet.height, t: performance.now(), lastY: e.clientY, lastT: performance.now(), moved: 0 };
+  });
+  handle.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const { peek, full } = sheetSnaps();
+    drag.moved = Math.max(drag.moved, Math.abs(e.clientY - drag.y));
+    drag.v = (e.clientY - drag.lastY) / Math.max(1, performance.now() - drag.lastT);
+    drag.lastY = e.clientY;
+    drag.lastT = performance.now();
+    applySheetHeight(Math.max(peek, Math.min(full, drag.h - (e.clientY - drag.y))), false);
+  });
+  const end = () => {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    const snaps = sheetSnaps();
+    if (d.moved < 6) { setSheet(sheet.state === 'peek' ? 'half' : 'peek'); return; }
+    const order = ['peek', 'half', 'full'];
+    let i = order.indexOf(order.reduce((best, k) => (Math.abs(snaps[k] - sheet.height) < Math.abs(snaps[best] - sheet.height) ? k : best), 'half'));
+    // A quick flick moves one step in its direction even if the finger did not travel far.
+    if (d.v > 0.45) i = Math.max(0, order.indexOf(sheet.state) - 1);
+    else if (d.v < -0.45) i = Math.min(2, order.indexOf(sheet.state) + 1);
+    setSheet(order[i]);
+  };
+  handle.addEventListener('pointerup', end);
+  handle.addEventListener('pointercancel', end);
+  handle.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') { e.preventDefault(); setSheet(sheet.state === 'peek' ? 'half' : 'full'); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setSheet(sheet.state === 'full' ? 'half' : 'peek'); }
+  });
+})();
+
 placeDetail();
 
 // ---------- map interaction ----------
@@ -396,16 +630,19 @@ scene.addEventListener('hover', (e) => {
 
 scene.addEventListener('pick', (e) => {
   const s = e.detail.boothId ? byBooth.get(e.detail.boothId) : null;
+  const room = e.detail.room ? placeByName.get(e.detail.room) : null;
   if (s) select(s.id, { scroll: true });
+  else if (room) selectPlace(room.id, { fly: false });
   else select(null);
 });
 
 const nameTag = $('nameTag');
 scene.onFrame = () => {
-  const s = byId.get(ui.selected || ui.spotlight);
-  const p = s ? scene.screenPoint(s.booths) : null;
+  const place = placeById.get(ui.place);
+  const s = place ? null : byId.get(ui.selected || ui.spotlight);
+  const p = place ? scene.placeScreenPoint() : s ? scene.screenPoint(s.booths) : null;
   if (!p) { nameTag.hidden = true; return; }
-  nameTag.textContent = s.name;
+  nameTag.textContent = place ? place.name : s.name;
   nameTag.style.left = `${p.x}px`;
   nameTag.style.top = `${p.y}px`;
   nameTag.hidden = false;
@@ -460,9 +697,13 @@ $('search').addEventListener('input', () => {
 });
 $('search').addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
-  const first = $('list').querySelector('li[data-id]:not(.mine)');
-  if (first) select(first.dataset.id, { fly: true });
+  const first = $('list').querySelector('li[data-id]:not(.mine), li[data-place]');
+  if (!first) return;
+  if (first.dataset.place) selectPlace(first.dataset.place);
+  else select(first.dataset.id, { fly: true });
+  $('search').blur();
 });
+$('search').addEventListener('focus', () => { if (sheetMode.matches && sheet.state !== 'full') setSheet('full'); });
 
 function setFilter(value) {
   ui.filter = value;
@@ -475,7 +716,7 @@ function setFilter(value) {
 }
 for (const chip of document.querySelectorAll('.chip[data-filter]')) {
   chip.addEventListener('click', () => {
-    if (chip.dataset.filter !== 'all' && !requireSignIn('mark')) return;
+    if (!['all', 'places'].includes(chip.dataset.filter) && !requireSignIn('mark')) return;
     setFilter(chip.dataset.filter);
   });
 }
@@ -734,6 +975,7 @@ if (window.matchMedia('(pointer: coarse)').matches && $('gestureHint')) {
 refreshBooths();
 renderList();
 renderAccount();
+resetSheet();
 requestAnimationFrame(() => {
   const el = $('loading');
   el.classList.add('gone');
@@ -741,7 +983,8 @@ requestAnimationFrame(() => {
 });
 
 const fromHash = decodeURIComponent(location.hash.slice(1));
-if (fromHash) {
+if (fromHash.startsWith('place-') && placeById.has(fromHash.slice(6))) selectPlace(fromHash.slice(6));
+else if (fromHash) {
   const s = byId.get(fromHash) || byBooth.get(fromHash.padStart(3, '0'));
   if (s) select(s.id, { fly: true, scroll: true });
 }
