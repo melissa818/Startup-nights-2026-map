@@ -202,7 +202,6 @@ function flushNote() {
   clearTimeout(noteTimer);
   if (noteFor && store.signedIn && store.get(noteFor).note !== $('noteInput').value) {
     store.set(noteFor, { note: $('noteInput').value });
-    $('noteSaved').textContent = 'Saved';
   }
 }
 
@@ -273,7 +272,6 @@ function renderDetail() {
 
   if (noteFor !== s.id) {
     $('noteInput').value = m.note || '';
-    $('noteSaved').textContent = '';
     noteFor = s.id;
   } else if (document.activeElement !== $('noteInput')) {
     $('noteInput').value = m.note || '';
@@ -321,7 +319,6 @@ $('toggleStar').addEventListener('click', () => {
   store.set(ui.selected, { interested: !m.interested });
 });
 $('noteInput').addEventListener('input', () => {
-  $('noteSaved').textContent = '';
   clearTimeout(noteTimer);
   noteTimer = setTimeout(flushNote, 600);
 });
@@ -585,7 +582,10 @@ function renderAccount() {
   $('accountBtn').hidden = !store.backend;
   document.body.classList.toggle('no-backend', !store.backend);
   // Narrow screens show "Account" instead of a long email, so the header keeps one row.
-  $('accountBtn').innerHTML = u ? `<span class="btn-long">${esc(u.email)}</span><span class="btn-short">Account</span>` : 'Sign in';
+  $('accountBtn').innerHTML = u
+    ? `<span class="btn-long">${esc(u.email)}</span><span class="btn-short">Account</span><svg class="btn-icon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="7" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.8 17c.9-3.1 3.3-4.8 6.2-4.8s5.3 1.7 6.2 4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`
+    : 'Sign in';
+  $('accountBtn').setAttribute('aria-label', u ? `Account: ${u.email}` : 'Sign in');
   $('accountBtn').title = u ? 'Your account' : 'Sign in to mark booths and keep private notes';
   $('footNote').textContent = u ? 'Private to your account' : store.backend ? 'Sign in to save marks and notes' : 'Saved on this device';
   refreshProgress();
@@ -663,10 +663,54 @@ store.addEventListener('auth', (e) => {
 });
 store.addEventListener('sync', (e) => {
   const el = $('syncStatus');
-  const map = { syncing: ['Saving…', 'busy'], synced: ['Saved', 'ok'], error: ['Offline, will retry', 'err'], offline: ['Offline', 'err'] };
+  // Saving happens quietly; only a problem is worth showing.
+  const map = { error: ['Offline, will retry', 'err'], offline: ['Offline', 'err'] };
   const v = map[e.detail.state];
   el.hidden = !v;
   if (v) { el.textContent = v[0]; el.className = `sync ${v[1]}`; }
+});
+
+// ---------- share: QR code and link to the live site ----------
+
+const LIVE_URL = 'https://startup-nights-2026.ttm.devcore.build';
+const SHARE_TITLE = 'Startup Nights 2026 booth map';
+const SHARE_TEXT = 'Find every startup at Startup Nights 2026 on the interactive 3D booth map';
+const shareModal = $('shareModal');
+
+$('shareBtn').addEventListener('click', () => {
+  const message = `${SHARE_TEXT}: ${LIVE_URL}`;
+  $('shareUrl').value = LIVE_URL;
+  $('shareWhatsApp').href = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  $('shareSms').href = `sms:?&body=${encodeURIComponent(message)}`;
+  $('shareEmail').href = `mailto:?subject=${encodeURIComponent(SHARE_TITLE)}&body=${encodeURIComponent(message)}`;
+  $('shareMore').hidden = typeof navigator.share !== 'function';
+  $('copyLink').textContent = 'Copy link';
+  shareModal.showModal();
+  $('copyLink').focus();
+});
+$('shareClose').addEventListener('click', () => shareModal.close());
+shareModal.addEventListener('click', (e) => { if (e.target === shareModal) shareModal.close(); });
+
+$('copyLink').addEventListener('click', async () => {
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(LIVE_URL);
+    ok = true;
+  } catch {
+    const input = $('shareUrl');
+    input.select();
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+  }
+  $('copyLink').textContent = ok ? 'Copied!' : 'Select and copy';
+  setTimeout(() => { $('copyLink').textContent = 'Copy link'; }, 2000);
+});
+
+$('shareMore').addEventListener('click', async () => {
+  try {
+    await navigator.share({ title: SHARE_TITLE, text: SHARE_TEXT, url: LIVE_URL });
+  } catch {
+    /* the person closed the share sheet */
+  }
 });
 
 // ---------- touch gesture hint (once per device) ----------
