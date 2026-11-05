@@ -6,7 +6,6 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fold = (s) => String(s ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-const ICON_CHECK = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_STAR = '<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 2.5l2.3 4.8 5.2.7-3.8 3.6.9 5.2L10 14.3l-4.6 2.5.9-5.2L2.5 8l5.2-.7z" fill="currentColor"/></svg>';
 const LANGROVE_ID = 'langrove';
 const BROWSE_KEY = 'sn26.browse';
@@ -122,14 +121,11 @@ function createScene() {
   }
 }
 const scene = createScene();
-$('totalCount').textContent = startups.length;
 
 function matches(s) {
   if (ui.filter === 'places') return false;
   const m = store.get(s.id);
   if (ui.filter === 'star' && !m.interested) return false;
-  if (ui.filter === 'visited' && !m.visited) return false;
-  if (ui.filter === 'todo' && m.visited) return false;
   if (ui.filter === 'notes' && !(m.note || '').trim()) return false;
   const q = ui.query;
   if (!q) return true;
@@ -157,7 +153,7 @@ function refreshBooths() {
     const m = store.get(s.id);
     const dim = active && !matches(s);
     for (const b of s.booths) {
-      if (mapBooths.has(b)) scene.setBoothState(b, { visited: m.visited, interested: m.interested, dim });
+      if (mapBooths.has(b)) scene.setBoothState(b, { visited: false, interested: m.interested, dim });
     }
   }
 }
@@ -167,9 +163,8 @@ function refreshProgress() {
   $('progressText').hidden = !signedIn;
   $('progressSignedOut').hidden = signedIn || !store.backend;
   const c = store.counts(startups.map((s) => s.id));
-  $('visitedCount').textContent = c.visited;
   $('starCount').textContent = c.interested;
-  $('progressFill').style.width = `${(c.visited / startups.length) * 100}%`;
+  $('noteCount').textContent = c.notes;
 }
 
 // ---------- sign-in prompts ----------
@@ -276,11 +271,11 @@ function renderList() {
     </li>`);
   }
   if (!items.length && !placeHits.length) {
-    rows.push(`<li class="empty">${ui.filter === 'all' ? 'No exhibitor or place matches your search.' : 'Nothing here yet. Mark booths from the map or the list.'}</li>`);
+    rows.push(`<li class="empty">${ui.filter === 'all' ? 'No exhibitor or place matches your search.' : 'Nothing here yet. Star booths from the map or the list.'}</li>`);
   }
   for (const s of items) {
     const m = store.get(s.id);
-    const cls = ['item', m.visited ? 'is-visited' : '', m.interested ? 'is-star' : ''].join(' ');
+    const cls = ['item', m.interested ? 'is-star' : ''].join(' ');
     const sub = [s.category, `Booth ${boothLabel(s.booths)}`, (m.note || '').trim() ? 'Has note' : ''].filter(Boolean).join(' · ');
     const num = s.booths.length > 1 ? `${s.booths[0]}+` : s.booths[0];
     rows.push(`<li class="${cls}" data-id="${esc(s.id)}" ${ui.selected === s.id ? 'aria-current="true"' : ''}>
@@ -289,7 +284,6 @@ function renderList() {
         <span class="txt"><span class="name">${esc(s.name)}</span><span class="sub">${esc(sub)}</span></span>
       </button>
       <span class="marks">
-        <button type="button" class="mark-btn v ${m.visited ? 'on' : ''}" data-act="visited" aria-pressed="${m.visited}" aria-label="Visited ${esc(s.name)}" title="Visited">${ICON_CHECK}</button>
         <button type="button" class="mark-btn s ${m.interested ? 'on' : ''}" data-act="star" aria-pressed="${m.interested}" aria-label="Interested in ${esc(s.name)}" title="Interested">${ICON_STAR}</button>
       </span>
     </li>`);
@@ -317,8 +311,7 @@ $('list').addEventListener('click', (e) => {
   if (act === 'open') { select(id, { fly: true }); return; }
   if (!requireSignIn('mark')) return;
   const m = store.get(id);
-  if (act === 'visited') store.set(id, { visited: !m.visited });
-  else if (act === 'star') store.set(id, { interested: !m.interested });
+  if (act === 'star') store.set(id, { interested: !m.interested });
 });
 
 // Scroll only the list (scrollIntoView would also scroll the page on phones).
@@ -413,16 +406,14 @@ function renderDetail() {
   }
   $('detailLinks').innerHTML = links.join('');
 
-  // Visitors: visited / interested / private note. Exhibitors on their own booth: visitor notes.
+  // Visitors: interested (star) / private note. Exhibitors on their own booth: visitor notes.
   const signedIn = store.signedIn;
   $('personalSection').hidden = isOwn || !store.backend;
   $('boothNotes').hidden = !isOwn;
   $('detailActions').hidden = !signedIn;
   $('notesBlock').hidden = !signedIn;
   $('signinPrompt').hidden = signedIn;
-  const v = $('toggleVisited'), st = $('toggleStar');
-  v.setAttribute('aria-pressed', m.visited);
-  v.querySelector('span').textContent = m.visited ? 'Visited' : 'Mark visited';
+  const st = $('toggleStar');
   st.setAttribute('aria-pressed', m.interested);
   st.querySelector('span').textContent = m.interested ? 'Starred' : 'Interested';
   if (isOwn) renderBoothNotes(s);
@@ -494,11 +485,6 @@ function select(id, { fly = false, scroll = false } = {}) {
 $('detailClose').addEventListener('click', () => {
   select(null);
   if (sheetMode.matches && sheet.state === 'card') setSheet('half');
-});
-$('toggleVisited').addEventListener('click', () => {
-  if (!requireSignIn('mark')) return;
-  const m = store.get(ui.selected);
-  store.set(ui.selected, { visited: !m.visited });
 });
 $('toggleStar').addEventListener('click', () => {
   if (!requireSignIn('mark')) return;
@@ -881,16 +867,16 @@ $('exportBtn').addEventListener('click', () => {
   if (!requireSignIn('mark')) return;
   const rows = startups
     .map((s) => ({ s, m: store.get(s.id) }))
-    .filter(({ m }) => m.visited || m.interested || (m.note || '').trim());
+    .filter(({ m }) => m.interested || (m.note || '').trim());
   const general = store.generalNotes();
   if (!rows.length && !general.length) {
     $('exportBtn').textContent = 'Nothing marked yet';
     setTimeout(() => { $('exportBtn').textContent = 'Export my notes'; }, 1800);
     return;
   }
-  downloadCsv('startup-nights-2026-my-notes.csv', ['Startup', 'Booth', 'Visited', 'Interested', 'Note', 'Website', 'Category', 'Written'], [
-    ...general.map((n) => ['General note', '', '', '', n.text, '', '', new Date(n.created_at).toLocaleString()]),
-    ...rows.map(({ s, m }) => [s.name, boothLabel(s.booths), m.visited ? 'yes' : '', m.interested ? 'yes' : '', m.note || '', s.website || '', s.category || '', '']),
+  downloadCsv('startup-nights-2026-my-notes.csv', ['Startup', 'Booth', 'Interested', 'Note', 'Website', 'Category', 'Written'], [
+    ...general.map((n) => ['General note', '', '', n.text, '', '', new Date(n.created_at).toLocaleString()]),
+    ...rows.map(({ s, m }) => [s.name, boothLabel(s.booths), m.interested ? 'yes' : '', m.note || '', s.website || '', s.category || '', '']),
   ]);
 });
 
@@ -901,8 +887,8 @@ let authEmail = '';
 let authReason = null;
 
 const REASONS = {
-  intro: 'Sign in with your email to mark booths you visit and keep private notes. Only you can see them, on any device.',
-  mark: 'Sign in to mark booths and keep notes. Your notes are private: only you can see them.',
+  intro: 'Sign in with your email to star booths you\'re interested in and keep private notes. Only you can see them, on any device.',
+  mark: 'Sign in to star booths and keep notes. Your notes are private: only you can see them.',
   booth: 'Sign in to keep private notes about the people who visit your booth.',
   notes: 'Sign in to write notes. They are private: only you can see them, on any device.',
 };
@@ -953,7 +939,7 @@ function renderAccount() {
     ? `<span class="btn-long">${esc(u.email)}</span><span class="btn-short">Account</span><svg class="btn-icon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="7" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.8 17c.9-3.1 3.3-4.8 6.2-4.8s5.3 1.7 6.2 4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`
     : 'Sign in';
   $('accountBtn').setAttribute('aria-label', u ? `Account: ${u.email}` : 'Sign in');
-  $('accountBtn').title = u ? 'Your account' : 'Sign in to mark booths and keep private notes';
+  $('accountBtn').title = u ? 'Your account' : 'Sign in to star booths and keep private notes';
   $('footNote').textContent = u ? 'Private to your account' : store.backend ? 'Sign in to save marks and notes' : 'Saved on this device';
   refreshProgress();
 }

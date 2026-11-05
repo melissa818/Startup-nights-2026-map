@@ -55,11 +55,9 @@ button { cursor: pointer; }
 .brand p { margin: 0; color: var(--muted); font-size: 12px; }
 .sub-short { display: none; }
 
-.progress { margin-left: auto; min-width: 210px; }
+.progress { margin-left: auto; text-align: right; }
 .progress-text { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
 .progress-text strong { color: var(--text); }
-.progress-bar { height: 5px; margin-top: 5px; border-radius: 99px; background: #333; overflow: hidden; }
-.progress-bar span { display: block; height: 100%; width: 0; background: var(--visited); transition: width .4s ease; }
 
 .account { display: flex; align-items: center; gap: 8px; }
 .share-btn { display: inline-flex; align-items: center; gap: 7px; }
@@ -225,7 +223,6 @@ button { cursor: pointer; }
   border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
 }
 .toggle:hover { background: #333; }
-.toggle.visited[aria-pressed="true"] { background: var(--visited); border-color: var(--visited); color: #fff; }
 .toggle.star[aria-pressed="true"] { background: var(--star); border-color: var(--star); color: #fff; }
 .notes-label { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 5px; }
 textarea, .modal input {
@@ -291,8 +288,7 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   padding: 4px 0; border-radius: 7px; background: var(--booth); color: #262626;
   font-variant-numeric: tabular-nums;
 }
-.item.is-visited .num { background: var(--visited); color: #fff; }
-.item.is-star:not(.is-visited) .num { background: var(--star); color: #fff; }
+.item.is-star .num { background: var(--star); color: #fff; }
 .item .name { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item .sub { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item .marks { display: flex; gap: 2px; }
@@ -301,7 +297,6 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   border: 0; border-radius: 8px; background: transparent; color: #5d5d5a;
 }
 .mark-btn:hover { background: #333; color: var(--text); }
-.mark-btn.on.v { color: var(--visited); }
 .mark-btn.on.s { color: var(--star); }
 .empty { padding: 30px 16px; text-align: center; color: var(--muted); }
 
@@ -519,7 +514,6 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .brand h1 { font-size: 15px; line-height: 1.25; }
   .progress { order: 3; flex: 1 0 100%; min-width: 0; margin: 0; display: flex; align-items: center; gap: 10px; }
   .progress-text { font-size: 12px; }
-  .progress-bar { flex: 1; margin: 0; height: 4px; }
   .account { margin-left: auto; }
   .account .btn { padding: 5px 12px; font-size: 13px; }
   .layout { flex-direction: column; }
@@ -587,7 +581,6 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
   .sub-short { display: inline; }
   .brand h1 { font-size: 14px; line-height: 1.2; }
   .progress { order: 0; flex: 1 1 auto; margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .progress-bar { flex: 1; margin: 0; max-width: 160px; }
   .account { margin-left: 0; }
   .layout { flex-direction: row; }
   .map-pane { flex: 1 1 auto; min-height: 0; }
@@ -601,7 +594,7 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progress-bar span, .gesture-hint { transition: none; }
+  .gesture-hint { transition: none; }
 }
 
 /* ---------- phones and tablets in portrait: the list is a sheet over a full-screen map ---------- */
@@ -732,7 +725,6 @@ textarea:focus, .modal input:focus { border-color: var(--accent); outline: none;
 @media (min-width: 861px) and (max-width: 1100px) {
   .sub-long { display: none; }
   .sub-short { display: inline; }
-  .progress { min-width: 160px; }
   .share-label { display: none; }
   .share-btn { min-width: 40px; justify-content: center; padding-left: 10px; padding-right: 10px; }
   .account .btn { max-width: 220px; }

@@ -12,9 +12,9 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
   whole map, pull it up (or tap the handle or the search box) to browse again.
 - **Startup details.** Each selection shows a short description, category and a link to the startup's
   website (from web research, see below).
-- **Track your visit.** Signed-in visitors mark booths as *visited* (turns green) or *interested*
-  (turns blue with a star) and keep notes per startup. Filter the list by Starred, To visit, Visited
-  or Notes, and export everything as a CSV after the event.
+- **Star what interests you.** Signed-in visitors star the booths they're interested in (they turn
+  blue with a star on the map) and keep notes per startup. Filter the list by Starred or Notes, and
+  export everything as a CSV after the event.
 - **General notes.** The pencil next to the search box opens a notepad for anything not tied to a
   booth (people met, ideas, follow-ups): add, edit or delete notes. The Notes filter shows them
   together with the startups you wrote notes on, search covers them, and they are in the CSV export.

@@ -31,7 +31,7 @@ project member deploys from the Langrove console.
 | id | uuid | |
 | visitor | relation → Visitor | |
 | startup | string | startup id slug from `site/data/startups.json` |
-| visited | boolean | |
+| visited | boolean | no longer set by the app (only the star is used); kept for older marks |
 | interested | boolean | the "starred" flag in the UI |
 | note | text | up to 4000 characters |
 | changed_at | number | epoch ms of the edit on the visitor's device; newest edit wins |
