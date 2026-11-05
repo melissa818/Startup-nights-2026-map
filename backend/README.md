@@ -65,7 +65,7 @@ signing people in as `Visitor` by `email`. The app calls:
 |---|---|
 | `boothmark.read` / `create` / `update` / `delete` | allow when `resource.visitor` is the signed-in Visitor |
 | `boothnote.read` / `create` / `update` / `delete` | allow when `resource.owner` is the signed-in Visitor |
-| `visitor.read` / `visitor.update` | allow when the resource is the signed-in Visitor |
+| `visitor.read` / `visitor.update` / `visitor.delete` | allow when the resource is the signed-in Visitor |
 
 So a person can only ever read or write their own marks and booth notes; anonymous callers get nothing.
 
@@ -76,6 +76,7 @@ So a person can only ever read or write their own marks and booth notes; anonymo
 | POST | `/visitors` | anyone | [register_visitor.js](endpoints/register_visitor.js) |
 | GET | `/visitors/me` | Visitor | [get_me.js](endpoints/get_me.js) |
 | PATCH | `/visitors/me` | Visitor | [update_me.js](endpoints/update_me.js) |
+| DELETE | `/visitors/me?confirm=delete-my-account` | Visitor | [delete_me.js](endpoints/delete_me.js) |
 | GET | `/marks` | Visitor | [list_marks.js](endpoints/list_marks.js) |
 | PUT | `/marks` | Visitor | [save_marks.js](endpoints/save_marks.js) |
 | GET | `/booth-notes` | Visitor | [list_booth_notes.js](endpoints/list_booth_notes.js) |
@@ -96,3 +97,7 @@ whichever edit is newer per startup, and answers the visitor's full list.
   does not overwrite; another visitor using the same note id gets their own row; anonymous calls
   answer 401.
 - Profile: `PATCH /visitors/me` sets `own_startup` and `welcomed` on the caller's own row only.
+- Delete account: without `confirm=delete-my-account` it answers 400 and deletes nothing; anonymous
+  answers 401; with it, the caller's Visitor row, marks and booth notes are deleted (2 + 2 rows in the
+  test) and another visitor's rows are untouched. Signing in again with the same email starts a new,
+  empty account.

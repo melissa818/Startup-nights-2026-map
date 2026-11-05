@@ -170,15 +170,22 @@
       <div id="stepSignedIn" hidden>
         <p>Signed in as <strong id="authWho"></strong>. Your marks and notes are private to this account.</p>
         <p class="muted" id="authOwnBooth"></p>
+        <button type="button" class="link-btn danger-link" id="authDeleteStart">Delete my account</button>
+      </div>
+      <div id="stepDelete" hidden>
+        <p>This permanently deletes your account, the booths you marked, your notes and any visitor notes for your booth. This cannot be undone.</p>
       </div>
       <p class="form-error" id="authError" role="alert"></p>
       <div class="modal-actions">
         <button type="button" class="btn ghost" id="authBrowse" hidden>Just browse the map</button>
         <button type="button" class="btn ghost" id="authBack" hidden>Use another email</button>
+        <button type="button" class="btn ghost" id="authCancelDelete" hidden>Keep my account</button>
         <button type="submit" class="btn primary" id="authSubmit">Send code</button>
       </div>
     </form>
   </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
 
   <script type="module" src="js/main.js"></script>
 </body>

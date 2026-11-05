@@ -15,6 +15,8 @@ An interactive 3D version of the official Startup Nights 2026 venue map and boot
   can browse the map without an account.
 - **Exhibitors.** On their own booth ("Exhibiting at this booth?"), signed-in exhibitors keep private
   notes on the people who stopped by: name, contact and feedback, exportable as CSV.
+- **Delete account.** In the account window, "Delete my account" (with a confirmation step) removes
+  the account and everything stored for it, on the server and on the device.
 - **First sign-in.** New users see a one-line welcome and the Langrove booth highlighted; a small
   "Built with Langrove" tag on the map jumps to that booth.
 

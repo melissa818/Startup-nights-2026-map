@@ -271,6 +271,18 @@ export class MarkStore extends EventTarget {
     return me;
   }
 
+  // Permanently delete the account and everything stored for it, on the server and on this device.
+  async deleteAccount() {
+    if (!this.user) return;
+    await api('DELETE', '/visitors/me?confirm=delete-my-account');
+    this.marks.clear(true);
+    this.boothNotes.clear(true);
+    this.user = null;
+    this.emit('auth', { user: null });
+    this.emit('change', { collection: null });
+    this.setSync('idle');
+  }
+
   async signOut() {
     try {
       await Promise.all([this.marks.push(), this.boothNotes.push()]);

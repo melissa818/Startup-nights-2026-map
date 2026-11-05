@@ -547,12 +547,16 @@ function authStep(step) {
   $('stepEmail').hidden = step !== 'email';
   $('stepCode').hidden = step !== 'code';
   $('stepSignedIn').hidden = step !== 'done';
-  $('authIntro').hidden = step === 'done';
+  $('stepDelete').hidden = step !== 'delete';
+  $('authIntro').hidden = step === 'done' || step === 'delete';
   $('authBack').hidden = step !== 'code';
+  $('authCancelDelete').hidden = step !== 'delete';
   $('authBrowse').hidden = !(step === 'email' && authReason === 'intro');
-  $('authTitle').textContent = step === 'done' ? 'Your account' : authReason === 'intro' ? 'Startup Nights 2026 booth map' : 'Sign in';
-  $('authSubmit').textContent = step === 'email' ? 'Send code' : step === 'code' ? 'Sign in' : 'Sign out';
-  $('authSubmit').className = step === 'done' ? 'btn' : 'btn primary';
+  $('authTitle').textContent = step === 'done' ? 'Your account'
+    : step === 'delete' ? 'Delete your account?'
+    : authReason === 'intro' ? 'Startup Nights 2026 booth map' : 'Sign in';
+  $('authSubmit').textContent = { email: 'Send code', code: 'Sign in', done: 'Sign out', delete: 'Delete account' }[step];
+  $('authSubmit').className = step === 'done' ? 'btn' : step === 'delete' ? 'btn danger' : 'btn primary';
   $('authError').textContent = '';
   modal.dataset.step = step;
 }
@@ -580,7 +584,8 @@ function renderAccount() {
   const u = store.user;
   $('accountBtn').hidden = !store.backend;
   document.body.classList.toggle('no-backend', !store.backend);
-  $('accountBtn').textContent = u ? u.email : 'Sign in';
+  // Narrow screens show "Account" instead of a long email, so the header keeps one row.
+  $('accountBtn').innerHTML = u ? `<span class="btn-long">${esc(u.email)}</span><span class="btn-short">Account</span>` : 'Sign in';
   $('accountBtn').title = u ? 'Your account' : 'Sign in to mark booths and keep private notes';
   $('footNote').textContent = u ? 'Private to your account' : store.backend ? 'Sign in to save marks and notes' : 'Saved on this device';
   refreshProgress();
@@ -591,6 +596,17 @@ $('authClose').addEventListener('click', closeAuth);
 $('authBrowse').addEventListener('click', closeAuth);
 modal.addEventListener('cancel', () => { if (authReason === 'intro') storageSet(BROWSE_KEY, '1'); });
 $('authBack').addEventListener('click', () => { authStep('email'); $('authEmail').focus(); });
+$('authDeleteStart').addEventListener('click', () => { authStep('delete'); $('authCancelDelete').focus(); });
+$('authCancelDelete').addEventListener('click', () => { authStep('done'); $('authSubmit').focus(); });
+
+let toastTimer = null;
+function showToast(text) {
+  const t = $('toast');
+  t.textContent = text;
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 5000);
+}
 
 $('authForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -623,6 +639,11 @@ $('authForm').addEventListener('submit', async (e) => {
         showWelcome();
         store.updateProfile({ welcomed: true });
       }
+    } else if (step === 'delete') {
+      await store.deleteAccount();
+      modal.close();
+      select(null);
+      showToast('Your account and all your notes have been deleted.');
     } else {
       await store.signOut();
       modal.close();
