@@ -79,7 +79,7 @@ export class FloorScene extends EventTarget {
     this.buildBooths();
     this.buildMarkers();
     this.initInput();
-    this.resetView(false);
+    this.setTopView(true, false); // the map opens in Top view; 3D is one tap away
     this.loop();
   }
 
@@ -99,16 +99,17 @@ export class FloorScene extends EventTarget {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color('#2e2e2e');
     // The ground fades into the background instead of ending in a hard edge.
-    this.scene.fog = new THREE.Fog('#2e2e2e', 1700, 4200);
+    this.scene.fog = new THREE.Fog('#2e2e2e', 2300, 5200);
 
     // A near plane of 4 (not 1) gives the depth buffer enough precision for flat labels.
-    this.camera = new THREE.PerspectiveCamera(42, 1, 4, 6000);
+    this.camera = new THREE.PerspectiveCamera(42, 1, 4, 7000);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.09;
     this.controls.screenSpacePanning = false;
     this.controls.minDistance = 35;
-    this.controls.maxDistance = 1500;
+    // Far enough for the whole hall to fit on a narrow phone in portrait.
+    this.controls.maxDistance = 2300;
     this.controls.maxPolarAngle = 1.3;
     this.controls.zoomToCursor = true;
 
@@ -617,7 +618,7 @@ export class FloorScene extends EventTarget {
     this.flyTo(pos, target, animate ? 750 : 0);
   }
 
-  setTopView(on) {
+  setTopView(on, animate = true) {
     this.topView = on;
     const c = this.controls;
     c.enableRotate = !on;
@@ -627,8 +628,15 @@ export class FloorScene extends EventTarget {
     c.touches = on
       ? { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN }
       : { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
-    if (this.selected.length) this.focus(this.selected);
-    else this.resetView(true);
+    if (this.selected.length) this.focus(this.selected, animate);
+    else this.resetView(animate);
+    this.updateAria();
+  }
+
+  updateAria() {
+    this.renderer.domElement.setAttribute('aria-label', this.topView
+      ? 'Floor plan seen from above. Drag to move, scroll or pinch to zoom.'
+      : '3D floor plan. Drag to rotate, scroll or pinch to zoom, right-drag or two fingers to pan.');
   }
 
   focus(ids, animate = true) {

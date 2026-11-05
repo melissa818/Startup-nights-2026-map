@@ -41,8 +41,8 @@
 
       <div class="map-tools" role="toolbar" aria-label="Map controls">
         <div class="seg" role="group" aria-label="View">
-          <button type="button" id="view3d" class="active" aria-pressed="true">3D</button>
-          <button type="button" id="view2d" aria-pressed="false">Top</button>
+          <button type="button" id="view3d" aria-pressed="false">3D</button>
+          <button type="button" id="view2d" class="active" aria-pressed="true">Top</button>
         </div>
         <button type="button" class="icon-btn" id="zoomIn" aria-label="Zoom in">+</button>
         <button type="button" class="icon-btn" id="zoomOut" aria-label="Zoom out">−</button>
@@ -67,7 +67,7 @@
       </div>
 
       <div class="tooltip" id="tooltip" role="status" hidden></div>
-      <div class="gesture-hint" id="gestureHint" hidden>Drag to rotate · pinch to zoom · two fingers to move</div>
+      <div class="gesture-hint" id="gestureHint" hidden>Drag to move · pinch to zoom · tap 3D to tilt</div>
       <div class="name-tag" id="nameTag" hidden></div>
 
       <article class="detail" id="detail" hidden aria-labelledby="detailName">
