@@ -67,6 +67,9 @@ export class FloorScene extends EventTarget {
     // The view centres on the uncovered part.
     this.inset = { l: 0, b: 0 };
     this.insetTarget = { l: 0, b: 0 };
+    // While the page lays out (e.g. the phone list sheet sliding in), keep the whole plan fitted,
+    // until the visitor touches the map or a booth is shown.
+    this.autoFitUntil = performance.now() + 4000;
     this.placeGroup = null; // highlighted rooms / points for a selected place
 
     this.initRenderer();
@@ -628,8 +631,9 @@ export class FloorScene extends EventTarget {
     c.touches = on
       ? { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN }
       : { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
-    if (this.selected.length) this.focus(this.selected, animate);
-    else this.resetView(animate);
+    // Switching view (or tapping the current one again) is also a reset: the whole floor plan,
+    // centred and facing the usual way. A selected booth stays highlighted.
+    this.resetView(animate);
     this.updateAria();
   }
 
@@ -655,6 +659,7 @@ export class FloorScene extends EventTarget {
   }
 
   focusOn(target, span, animate) {
+    this.autoFitUntil = 0;
     // Small map panes (phones) get a closer view so the booth isn't tiny.
     const near = Math.min(this.container.clientWidth, this.container.clientHeight) < 500 ? 0.72 : 1;
     if (this.topView) {
@@ -676,6 +681,7 @@ export class FloorScene extends EventTarget {
   }
 
   zoomBy(factor) {
+    this.autoFitUntil = 0;
     const off = this.camera.position.clone().sub(this.controls.target);
     const len = THREE.MathUtils.clamp(off.length() * factor, this.controls.minDistance, this.controls.maxDistance);
     off.setLength(len);
@@ -683,18 +689,38 @@ export class FloorScene extends EventTarget {
   }
 
   flyTo(pos, target, ms) {
+    // Drop any leftover drag momentum so it doesn't pull against the flight.
+    const c = this.controls;
+    const damping = c.enableDamping;
+    c.enableDamping = false;
+    c.update();
+    c.enableDamping = damping;
     if (!ms) {
       this.camera.position.copy(pos);
-      this.controls.target.copy(target);
-      this.controls.update();
+      c.target.copy(target);
+      c.update();
       this.tween = null;
       return;
     }
-    this.tween = {
-      t0: performance.now(), ms,
-      p0: this.camera.position.clone(), p1: pos,
-      q0: this.controls.target.clone(), q1: target,
-    };
+    // Fly around the target (distance, tilt, compass direction) rather than in a straight line,
+    // so undoing a rotation swings the camera round instead of cutting across the plan.
+    const s0 = new THREE.Spherical().setFromVector3(this.camera.position.clone().sub(c.target));
+    const s1 = new THREE.Spherical().setFromVector3(pos.clone().sub(target));
+    let turn = s1.theta - s0.theta;
+    if (turn > Math.PI) turn -= Math.PI * 2;
+    if (turn < -Math.PI) turn += Math.PI * 2;
+    this.tween = { t0: performance.now(), ms, s0, s1, turn, q0: c.target.clone(), q1: target };
+  }
+
+  stepTween() {
+    const tw = this.tween;
+    const k = Math.min(1, (performance.now() - tw.t0) / tw.ms);
+    const e = ease(k);
+    const lerp = THREE.MathUtils.lerp;
+    this.controls.target.lerpVectors(tw.q0, tw.q1, e);
+    const s = new THREE.Spherical(lerp(tw.s0.radius, tw.s1.radius, e), lerp(tw.s0.phi, tw.s1.phi, e), tw.s0.theta + tw.turn * e);
+    this.camera.position.setFromSpherical(s).add(this.controls.target);
+    if (k >= 1) this.tween = null;
   }
 
   // Screen position (CSS px within the container) of a point above the given booths.
@@ -732,7 +758,9 @@ export class FloorScene extends EventTarget {
     el.addEventListener('pointerdown', (e) => {
       down = { x: e.clientX, y: e.clientY, t: performance.now() };
       this.tween = null;
+      this.autoFitUntil = 0;
     });
+    el.addEventListener('wheel', () => { this.autoFitUntil = 0; }, { passive: true });
     el.addEventListener('pointerup', (e) => {
       if (!down) return;
       const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
@@ -777,11 +805,7 @@ export class FloorScene extends EventTarget {
       let active = this.needsRender;
       if (this.tween) {
         active = true;
-        const k = Math.min(1, (performance.now() - this.tween.t0) / this.tween.ms);
-        const e = ease(k);
-        this.camera.position.lerpVectors(this.tween.p0, this.tween.p1, e);
-        this.controls.target.lerpVectors(this.tween.q0, this.tween.q1, e);
-        if (k >= 1) this.tween = null;
+        this.stepTween();
       }
       if (this.controls.update()) active = true;
       let insetMoved = false;
@@ -792,7 +816,11 @@ export class FloorScene extends EventTarget {
           insetMoved = true;
         }
       }
-      if (insetMoved) { active = true; this.applyInset(); }
+      if (insetMoved) {
+        active = true;
+        this.applyInset();
+        if (!this.tween && performance.now() < this.autoFitUntil) this.resetView(false);
+      }
 
       for (const b of this.booths.values()) {
         if (Math.abs(b.height - b.targetH) > 0.01) {
