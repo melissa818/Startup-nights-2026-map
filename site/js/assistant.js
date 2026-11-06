@@ -117,7 +117,7 @@ export function initAssistant({ store, esc, fold, startups, byId, placeById, boo
   function localAnswer(question) {
     const q = fold(question);
     if (/\b(feedback|suggest|suggestions?|ideas?|bugs?|complain|complaint)\b/.test(q) && !/\b(where|booth)\b/.test(q)) {
-      return { text: "The AI assistant isn't available right now, but you can send your feedback with the form. I've opened it for you.", openFeedback: true };
+      return { text: "Thanks! I've opened the feedback form for you.", openFeedback: true };
     }
     const nums = (q.match(/\b\d{1,3}\b/g) || []).map((n) => n.padStart(3, '0'));
     const words = q.split(/[^a-z0-9]+/).filter((w) => w.length > 1 && !STOP.has(w));
@@ -137,9 +137,9 @@ export function initAssistant({ store, esc, fold, startups, byId, placeById, boo
       .map((p) => ({ p, sc: score(fold(p.name), p.search) }))
       .filter((x) => x.sc > 0).sort((a, b) => b.sc - a.sc).slice(0, 3).map((x) => x.p.id);
     if (!ss.length && !ps.length) {
-      return { text: "The AI assistant isn't available right now, and I couldn't find that on the map. Try a startup name, a booth number or a place such as \"toilets\", or use the search box." };
+      return { text: "Sorry, I couldn't answer that just now. Try a startup name, a booth number or a place such as \"toilets\", or use the search box." };
     }
-    return { text: "The AI assistant isn't available right now, but this is what I found on the map:", startups: ss, places: ps };
+    return { text: 'Here is what I found on the map:', startups: ss, places: ps };
   }
 
   // ---------- asking ----------

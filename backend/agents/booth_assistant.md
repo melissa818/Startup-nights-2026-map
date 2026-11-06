@@ -1,6 +1,6 @@
 # Agent `booth_assistant`
 
-- **Model**: `{ provider: "anthropic", model: "claude-haiku-5-5", access: "anthropic", params: { max_tokens: 700, temperature: 0.2 } }`
+- **Model**: `{ provider: "anthropic", model: "claude-haiku-5-5", access: "anthropic", params: { max_tokens: 700 } }` (this model does not accept `temperature`)
 - **Access** `anthropic`: kind `api-key`, header `x-api-key`, base URL `https://api.anthropic.com`,
   key from the project secret `ANTHROPIC_API_KEY` (set by a person in the Langrove console).
 - **Tools**: `search_map` (working), `save_feedback` (working), `answer` (response: ends the turn).
